@@ -12,7 +12,7 @@ This software licensed under the
 ##Progress
 
 <table>
-<tr><td><b>Component</b></td><td><b>Status</b></td></tr>
+<tr><td><b>Milestone</b></td><td><b>Status</b></td></tr>
 <tr><td>Lexical Analysis</td><td>Incomplete</td></tr>
 <tr><td>Semantics</td><td>Incomplete</td></tr>
 <tr><td>Code Generation</td><td>Incomplete</td></tr>
