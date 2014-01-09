@@ -1,4 +1,4 @@
 compiler
 ========
 
-Compiler developed for the COOL language and MIPS instruction set architecture.
+This is a repo for a project written in Ruby to demonstrate Compiler Theory concepts.
