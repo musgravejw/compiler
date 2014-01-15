@@ -89,7 +89,7 @@ class Scanner
       elsif lexeme == @assignment
         token['class'] = "assignment"
       else
-      	token['class'] = "identifier"
+        token['class'] = "identifier"
       end
       token['lexeme'] = lexeme
       return token
