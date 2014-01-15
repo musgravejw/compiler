@@ -25,32 +25,43 @@ class Scanner
     @line.times{file.gets}  # move to the current line
 
     row = file.gets
-    token = ""
-    i = 0    
+    lexeme = ""
+    i = 0
 
-    row.each_char do |c|
-      if i >= @col
+    # if we are at the end of line
+    if @col >= row.size
+    	row = file.gets
+    	@line += 1
+    	@col = 0
+    end
+
+    # look at each char
+    row.each_char do |c|      
+      # ignore if we've checked it before
+      if i >= @col      	
         case c
-        when ' '          
+        when " "         
           @col = i + 1
           break
-        when '\t'
+        when "\t"
           @col = i + 1
           break
-        when '\n'
+        when "\n"
           @line += 1
           @col = 0
+          break        
         else          
-          token += c.to_s
+          @col += 1
+          lexeme += c          
         end
       end
       i += 1
-    end
+    end    
 
-    puts token
+    puts lexeme
 
     # add token class
-    # if @sybols.include? token
+    # if @sybols.include? lexeme
 
     # else
 
@@ -76,4 +87,3 @@ end
 file_in = ARGV[0]
 s = Scanner.new(file_in)
 puts s.get_next_token()
-
