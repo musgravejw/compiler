@@ -13,7 +13,7 @@ This software licensed under the
 
 <table>
 <tr><td><b>Milestone</b></td><td><b>Status</b></td></tr>
-<tr><td>Lexical Analysis</td><td>Incomplete</td></tr>
+<tr><td>Lexical Analysis (Scanner)</td><td>Incomplete</td></tr>
 <tr><td>Parser</td><td>Incomplete</td></tr>
 <tr><td>Semantic Analysis</td><td>Incomplete</td></tr>
 <tr><td>Optimization</td><td>Incomplete</td></tr>
