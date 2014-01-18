@@ -84,9 +84,9 @@ class Scanner
     def create_token(lexeme)
       token = {}
       # check the token class      
-      if is_numeric?(lexeme)
+      if is_numeric? lexeme
         token['class'] = "integer"
-      elsif is_string?(lexeme)
+      elsif is_string? lexeme
         token['class'] = "string"
       elsif @operators.include? lexeme
         token['class'] = "operator"
@@ -109,7 +109,7 @@ class Scanner
       elsif lexeme == @colon_equals
         token['class'] = "colon_equals"      
       else
-        token['class'] = "identifier" unless !is_identifier?(lexeme)
+        token['class'] = "identifier" unless !is_identifier? lexeme
       end
       token['lexeme'] = lexeme
       @symbol_table.push(token)
