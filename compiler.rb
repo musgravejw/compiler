@@ -13,8 +13,8 @@ class Compiler
   end
 
   def start()
-  	token = ""
-  	while token != "EOF"
+    token = ""
+    while token != "EOF"
       token = @scanner.get_next_token()
     end
   end
