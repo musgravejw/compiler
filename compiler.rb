@@ -14,7 +14,7 @@ class Compiler
 
   def start()
     token = ""
-    while token != "EOF"
+    while token['lexeme'] != "EOF"
       token = @scanner.get_next_token()
     end
   end
