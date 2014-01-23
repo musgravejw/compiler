@@ -26,6 +26,7 @@ class Scanner
     @line = 0
     @col = 0
     @error = ""
+    @symbol_table = []
     @filename = file
     set_symbols()
   end
@@ -40,13 +41,17 @@ class Scanner
       i = 0
       file = File.open(@filename, 'r')  # open the file    
       @line.times{file.gets}  # move to the current line
-      row = file.gets      
+      row = file.gets
 
       # if we are at the end of line
       if @col >= row.size
         row = file.gets
         @line += 1
         @col = 0
+      end
+
+      if row.nil?
+        row = "EOF"
       end
 
       # look at each char
@@ -110,22 +115,22 @@ class Scanner
         token['class'] = "colon_equals"      
       else
         token['class'] = "identifier" unless !is_identifier? lexeme
-      end
-      token['lexeme'] = lexeme
+      end      
+      token['lexeme'] = lexeme      
       @symbol_table.push(token)
       return token
     end
 
     def is_identifier?(str)
-      return (str[/[a-zA-Z][a-zA-Z0-9_]*/]).size > 0
+      return !(str[/[a-zA-Z][a-zA-Z0-9_]*/]).nil?
     end
 
     def is_string?(str)
-      return (str[/"[a-zA-Z0-9 _,;:.']*"/]).size > 0
+      return !(str[/"[a-zA-Z0-9 _,;:.']*"/]).nil?
     end
 
     def is_numeric?(str)
-      return (str[/[0-9][0-9_]*[.[0-9_]*]?/]).size > 0
+      return !(str[/[0-9][0-9_]*[.[0-9_]*]?/]).nil?
     end
 
     def set_symbols()
