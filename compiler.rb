@@ -2,6 +2,8 @@
 # Written by John Musgrave
 # Main compiler runtime
 
+require './scanner.rb'
+
 class Compiler
   @line = 0
   @error = ""
@@ -12,10 +14,11 @@ class Compiler
     start()
   end
 
-  def start()
+  def start
     token = ""
     while token['lexeme'] != "EOF"
       token = @scanner.get_next_token()
+      puts token.to_s
     end
   end
 
