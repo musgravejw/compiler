@@ -2,24 +2,16 @@
 # Written by John Musgrave
 # Main compiler runtime
 
-require './scanner.rb'
+require './parser.rb'
 
 class Compiler
   @line = 0
   @error = ""
   @scanner = nil
 
-  def initialize(filename)
-    @scanner = Scanner.new(filename)
-    start()
-  end
-
-  def start
-    token = ""
-    while token['lexeme'] != "EOF"
-      token = @scanner.get_next_token()
-      puts token.to_s
-    end
+  def initialize(filename)    
+    @parser = Parser.new(filename)
+    @parser.start()
   end
 
   def reportError(message)
