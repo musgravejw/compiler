@@ -1,5 +1,6 @@
 # parser.rb
-# LL(1) Recursive Descent parser
+# Abstract:  LL(1) Recursive Descent parser
+# Uses scanner to build abstract syntax tree
 
 require './scanner.rb'
 
