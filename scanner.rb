@@ -137,7 +137,7 @@ class Scanner
       # define token class members
       @whitespace = [" ", "\n", "\t", "\r"]
       @operators = ["+", "-", "/", "*", "==", "!=", "!", "&&", "||"]      
-      @keywords = []
+      @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end"]
       @left_paren = "("
       @right_paren = ")"
       @left_brace = "{"
