@@ -366,58 +366,98 @@ class Parser
             if @token.class == "right_paren"
               increment()
               if @token.class == "keyword" && @token.lexeme == "then"
+                if statement() == true
+                  increment()
+                  until @token.lexeme == "end" || @token.lexeme == "else"
+                    if statement() == true
+                      increment()
+                      if @token.class != "semi_colon"
+                        return false
+                      end
+                  end
+                  increment()
+                  if @token.class == "keyword" && @token.lexeme == "else"
+                    if statement() == true
+                      increment()
+                      until @token.lexeme == "end"
+                        if statement() == true
+                          increment()
+                          if @token.class != "semi_colon"
+                            return false
+                          end
+                        end
+                    end
+                  end
+                  increment()
+                  if @token.class == "keyword" && @token.lexeme == "if"
+                    result = true
+                  end
+                end
               end
             end
           end
         end
       end
       return result
-    end
+    end   
 
-    def if_then
-      result = false
-                     
-                if statement() == true
-                  increment()
-                  if @token.class == "semi_colon"
-                    increment()                                        
-                    if @token.class == "keyword" && @token.lexeme == "end"
-                      if @token.class == "keyword" && @token.lexeme == "if"
-                        result = true
-                      end
-                    else
-                      
-                    end
-     
-     
-    end
-
+    # <loop_statement> ::=
+    #   for ( <assignment_statement> ; 
+    #     <expression> ) 
+    #     ( <statement> ; )*
+    #   end for
     def loop_statement
     end
 
+    # <return_statement> ::= return
     def return_statement
+      result = false
+      increment()
+      if @token.class == "keyword" && @token.lexeme == "return"
+        result = true
+      end
+      return result
     end
 
+    # <identifier> ::= [a-zA-Z][a-zA-Z0-9_]*
     def identifier
       result =!(@next[/[a-zA-Z][a-zA-Z0-9_]*/]).nil?
       increment()
       return result
     end
 
+    # <expression> ::=
+    #   <expression> & <arithOp>
+    # | <expression> | <arithOp>
+    # | [ not ] <arithOp>    
     def expression
+
     end
 
+    # <arithOp> ::=
+    #   <arithOp> + <relation>
+    # | <arithOp> - <relation>
+    # | <relation>
     def arithmetic_operator
+
     end
 
+    # <relation> ::=
+    #   <relation> < <term>
+    # | <relation> >= <term>
+    # | <relation> <= <term>
+    # | <relation> > <term>
+    # | <relation> == <term>
+    # | <relation> != <term>
+    # | <term>
     def relational_operator
-      result = false
-      if relation() && term()
-        result = true
-      end
-      return result
+
     end
 
+    # <term> ::= 
+    #   <term> * <factor>
+    # | <term> / <factor>
+    # | <factor>
     def term
       result = false
       if term() && factor()
@@ -426,55 +466,36 @@ class Parser
       return result
     end
 
+    # <factor> ::= 
+    #   ( <expression> ) 
+    # | [ - ] <name> 
+    # | [ - ] <number> 
+    # | <string>
+    # | true
+    # | false
     def factor
     end
 
+    # <name> ::= 
+    # <identifier> [ [ <expression> ] ]
     def name
       return identifier() && expression()
     end
 
+    # <argument_list> ::=
+    #   <expression> , <argument_list>
+    # | <expression>
     def argument_list
     end
 
-    def number(str)
-      return !(str[/[0-9][0-9_]*[.[0-9_]*]/]).nil?
-    end
-
-    def string(str)
-      return !(str[/"[a-zA-Z0-9_,;:.']*"/]).nil?
-    end
-
-    def increment
-      @next = @scanner.get_next_token()
-    end
-
-    def program
-      result = @next.lexeme == "program"
+    # <number> ::= [0-9][0-9_]*[.[0-9_]*]
+    def number
       increment()
-      return result
+      return @token.class == "integer"      
     end
 
-    def is
-      rresult = @next.lexeme == "is"
+    def string
       increment()
-      return result
-    end
-
-    def begin_program
-      result = @next.lexeme == "begin"
-      increment()
-      return result
-    end
-
-    def end_program
-      result = @next.lexeme == "end program"
-      increment()
-      return result
-    end
-
-    def procedure
-      result = @next.lexeme == "procedure"
-      increment()
-      return result
-    end
+      return @token.class == "string"
+    end   
 end
