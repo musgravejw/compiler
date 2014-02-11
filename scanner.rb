@@ -15,12 +15,15 @@ class Scanner
   @keywords = []
   @left_paren = ""
   @right_paren = ""
+  @left_brace = ""
+  @right_brace = ""
+  @left_bracker = ""
+  @right_bracket = ""
   @semi_colon = ""
   @assignment = ""
   @colon = ""
   @comma = ""
-  @colon_equals = ""
-  @reserved_words = []
+  @colon_equals = ""  
 
   def initialize(file)
     @line = 0
@@ -94,9 +97,7 @@ class Scanner
       elsif is_string? lexeme
         token['class'] = "string"
       elsif @operators.include? lexeme
-        token['class'] = "operator"
-      elsif @reserved_words.include? lexeme
-        token['class'] = "reserved_word"
+        token['class'] = "operator"      
       elsif @keywords.include? lexeme
         token['class'] = "keyword"
       elsif lexeme == @left_paren
@@ -137,17 +138,18 @@ class Scanner
       # define token class members
       @whitespace = [" ", "\n", "\t", "\r"]
       @operators = ["+", "-", "/", "*", "==", "!=", "!", "&&", "||"]      
-      @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end"]
+      @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end", "EOF"]
       @left_paren = "("
       @right_paren = ")"
       @left_brace = "{"
       @right_brace = "}"
+      @left_bracket = "["
+      @right_bracket = "]"
       @semi_colon = ";"
       @assignment = "="
       @colon = ":"
       @comma = ","
-      @colon_equals = ":="
-      @reserved_words = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end", "EOF"]
+      @colon_equals = ":="      
     end
 end
 
