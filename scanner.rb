@@ -137,7 +137,7 @@ class Scanner
     def set_symbols()
       # define token class members
       @whitespace = [" ", "\n", "\t", "\r"]
-      @operators = ["+", "-", "/", "*", "==", "!=", "!", "&&", "||"]      
+      @operators = ["+", "-", "/", "*", ">", ">=", "<", "<=", "==", "!=", "!", "&&", "||"]      
       @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end", "EOF"]
       @left_paren = "("
       @right_paren = ")"

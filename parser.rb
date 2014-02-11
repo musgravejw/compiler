@@ -407,6 +407,35 @@ class Parser
     #     ( <statement> ; )*
     #   end for
     def loop_statement
+      result = false
+      increment()
+      if @token.class == "keyword" && @token.lexeme == "for"
+        increment()
+        if @token.class == "left_paren"
+          if assignment_statement() == true
+            increment()
+            if @token.class == "semi_colon"
+              if expression() == true
+                until statement() == true
+                  statement()
+                  increment()
+                  if @token.class != "semi_colon"
+                    return false
+                  end
+                end
+                increment()
+                if @token.class == "keyword" && @token.lexeme == "end"
+                  increment()
+                  if @token.class == "keyword" && @token.lexeme == "for"
+                    result = true
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      return result
     end
 
     # <return_statement> ::= return
@@ -427,19 +456,48 @@ class Parser
     end
 
     # <expression> ::=
-    #   <expression> & <arithOp>
-    # | <expression> | <arithOp>
-    # | [ not ] <arithOp>    
+    #   <expression> & <arithmetic_operator>
+    # | <expression> | <arithmetic_operator>
+    # | [ not ] <arithmetic_operator>    
     def expression
-
+      result = false
+      if !arithmetic_operator() == true
+        result = true
+      elsif expression() == true
+        increment()
+        if @token.class == "oprator" && @token.lexeme == "&"
+          if arithmetic_operator() == true
+            result = true
+          end
+        elsif @token.class == "oprator" && @token.lexeme == "|"
+          if arithmetic_operator() == true
+            result = true
+          end
+        end
+      end
+      return result
     end
 
-    # <arithOp> ::=
-    #   <arithOp> + <relation>
-    # | <arithOp> - <relation>
+    # <arithmetic_operator> ::=
+    #   <arithmetic_operator> + <relation>
+    # | <arithmetic_operator> - <relation>
     # | <relation>
     def arithmetic_operator
-
+      result = false
+      if relation() == true
+      elsif arithmetic_operator() == true
+        increment()
+        if @token.class == "operator" && @token.lexeme == "+"
+          if relation() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == "-"
+          if relation() == true
+            result = true
+          end
+        end          
+      end
+      return result
     end
 
     # <relation> ::=
@@ -450,8 +508,39 @@ class Parser
     # | <relation> == <term>
     # | <relation> != <term>
     # | <term>
-    def relational_operator
-
+    def relation
+      result = false
+      if term() == true
+        result = true
+      elsif relation() == true
+        increment()
+        if @token.class == "operator" && @token.lexeme == "<"
+          if term() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == ">="
+          if term() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == "<="
+          if term() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == ">"
+          if term() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == "=="
+          if term() == true
+            result = true
+          end
+        elsif @token.class == "operator" && @token.lexeme == "!="
+          if term() == true
+            result = true
+          end
+        end
+      end
+      return result
     end
 
     # <term> ::= 
@@ -460,7 +549,16 @@ class Parser
     # | <factor>
     def term
       result = false
-      if term() && factor()
+      if term() == true
+        increment()
+        if @token.class == "operator" 
+          if @token.lexeme == "*" && factor() == true
+            result = true
+          elsif @token.lexeme == "/" && factor() == true
+            result = true
+          end
+        end
+      elsif factor() == true
         result = true
       end
       return result
@@ -474,18 +572,67 @@ class Parser
     # | true
     # | false
     def factor
+      result = false
+      increment()
+      if @token.class == "left_paren"
+        if expression() == true
+          increment()
+          if @token.class == "right_paren"
+            result = true
+          end
+        end
+      elsif @token.class == "operator" && @token.lexeme == "-"        
+        if name() == true
+          result = true
+        elsif number() == true
+          result = true
+        end
+      elsif string() == true
+        result = true
+      elsif @token.class == "keyword"
+        if @token.lexeme == "true"
+          result = true
+        elsif @token.lexeme == "false"
+          result = true
+        end
+      end
+      return result
     end
 
     # <name> ::= 
     # <identifier> [ [ <expression> ] ]
     def name
-      return identifier() && expression()
+      result = false
+      if identifier() == true
+        increment()
+        if @token.class == "left_bracket"
+          if expression() == true
+            increment()
+            if @token.class == "right_bracket"
+              result = true
+            end
+          end
+        end
+      end
+      return result
     end
 
     # <argument_list> ::=
     #   <expression> , <argument_list>
     # | <expression>
     def argument_list
+      result = false
+      if expression() == true
+        increment()
+        if @token.class == "comma"
+          if argument_list() == true
+            result = true
+          end
+        else
+          result = true
+        end
+      end
+      return result
     end
 
     # <number> ::= [0-9][0-9_]*[.[0-9_]*]
