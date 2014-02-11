@@ -365,34 +365,34 @@ class Parser
             increment()
             if @token.class == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "then"
-                if statement() == true
-                  increment()
-                  until @token.lexeme == "end" || @token.lexeme == "else"
-                    if statement() == true
-                      increment()
-                      if @token.class != "semi_colon"
-                        return false
-                      end
-                  end
-                  increment()
-                  if @token.class == "keyword" && @token.lexeme == "else"
-                    if statement() == true
-                      increment()
-                      until @token.lexeme == "end"
-                        if statement() == true
-                          increment()
-                          if @token.class != "semi_colon"
-                            return false
-                          end
-                        end
+              if @token.class == "keyword" && @token.lexeme == "then" && statement() == true                
+                increment()
+                until @token.lexeme == "end" || @token.lexeme == "else"
+                  if statement() == true
+                    increment()
+                    if @token.class != "semi_colon"
+                      return false
                     end
                   end
-                  increment()
-                  if @token.class == "keyword" && @token.lexeme == "if"
-                    result = true
+                end
+                increment()
+                if @token.class == "keyword" && @token.lexeme == "else"
+                  if statement() == true
+                    increment()
+                    until @token.lexeme == "end"
+                      if statement() == true
+                        increment()
+                        if @token.class != "semi_colon"
+                          return false
+                        end
+                      end
+                    end
                   end
                 end
+                increment()
+                if @token.class == "keyword" && @token.lexeme == "if"
+                  result = true
+                end                
               end
             end
           end
@@ -485,6 +485,7 @@ class Parser
     def arithmetic_operator
       result = false
       if relation() == true
+        result = true
       elsif arithmetic_operator() == true
         increment()
         if @token.class == "operator" && @token.lexeme == "+"
@@ -574,13 +575,11 @@ class Parser
     def factor
       result = false
       increment()
-      if @token.class == "left_paren"
-        if expression() == true
-          increment()
-          if @token.class == "right_paren"
-            result = true
-          end
-        end
+      if @token.class == "left_paren" && expression() == true        
+        increment()
+        if @token.class == "right_paren"
+          result = true
+        end        
       elsif @token.class == "operator" && @token.lexeme == "-"        
         if name() == true
           result = true
@@ -605,13 +604,11 @@ class Parser
       result = false
       if identifier() == true
         increment()
-        if @token.class == "left_bracket"
-          if expression() == true
-            increment()
-            if @token.class == "right_bracket"
-              result = true
-            end
-          end
+        if @token.class == "left_bracket" && expression() == true          
+          increment()
+          if @token.class == "right_bracket"
+            result = true
+          end          
         end
       end
       return result
