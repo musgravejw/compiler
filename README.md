@@ -10,8 +10,8 @@ Written by [John Musgrave](http://johnmusgrave.com).
 
 <table>
 <tr><td><b>Milestone</b></td><td><b>Status</b></td></tr>
-<tr><td>Lexical Analyzer</td><td>Testing</td></tr>
-<tr><td>Parser</td><td>Development</td></tr>
+<tr><td>Lexical Analyzer</td><td>Completed</td></tr>
+<tr><td>Parser</td><td>Copmleted</td></tr>
 <tr><td>Semantics</td><td>Incomplete</td></tr>
 <tr><td>Optimization</td><td>Incomplete</td></tr>
 <tr><td>Code Generation</td><td>Incomplete</td></tr>
