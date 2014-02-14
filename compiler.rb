@@ -1,6 +1,6 @@
 # compiler.rb
 # Written by John Musgrave
-# Main compiler runtime
+#   Main compiler runtime
 
 require './parser.rb'
 

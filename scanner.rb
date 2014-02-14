@@ -1,7 +1,7 @@
 # scanner.rb
 # John Musgrave
 # Abstract:  This is the scanner to handle our lexical analysis.  
-# Identifies the token class of each lexeme.
+#   Identifies the token class of each lexeme.
 
 class Scanner
   @line = 0
@@ -25,6 +25,8 @@ class Scanner
   @comma = ""
   @colon_equals = ""  
 
+  attr_accessor :line, :col
+
   def initialize(file)
     @line = 0
     @col = 0
@@ -34,20 +36,27 @@ class Scanner
     set_symbols()
   end
 
-  def get_next_token()
+  def get_next_token
     if @filename.nil?
       # file not found
       puts "Fatal:  File not found.  Please enter a valid filename."
     else
+      begin
+        file = File.open(@filename, 'r')  # open the file    
+      rescue
+        abort "Fatal:  File not found.  Please enter a valid filename."
+      end
+
       token = {}
       lexeme = ""
-      i = 0
-      file = File.open(@filename, 'r')  # open the file    
+      i = 0      
+
       @line.times{file.gets}  # move to the current line
       row = file.gets
 
-      # if we are at the end of line
-      if @col >= row.size
+      if row.nil?
+        puts "Scan completed."
+      elsif @col >= row.size  # if we are at the end of line
         row = file.gets
         @line += 1
         @col = 0
@@ -138,7 +147,7 @@ class Scanner
       # define token class members
       @whitespace = [" ", "\n", "\t", "\r"]
       @operators = ["+", "-", "/", "*", ">", ">=", "<", "<=", "==", "!=", "!", "&&", "||"]      
-      @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end", "EOF"]
+      @keywords = ["string", "case", "int", "for", "bool", "and", "float", "or", "global", "not", "in", "program", "out", "procedure", "if", "begin", "then", "return", "else", "end", "EOF", "is"]
       @left_paren = "("
       @right_paren = ")"
       @left_brace = "{"

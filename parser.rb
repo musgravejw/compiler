@@ -1,7 +1,7 @@
 # parser.rb
 # Abstract:  LL(1) Recursive Descent parser
-# Uses scanner to build abstract syntax tree
-# Grammar requirements for each method are stated in BNF notaion above
+#   Uses scanner to build abstract syntax tree
+#   Grammar requirements for each method are stated in BNF notaion above
 
 require './scanner.rb'
 
@@ -14,6 +14,11 @@ class Parser
 
   def increment
     @token = @scanner.get_next_token()
+    # puts @token
+  end
+
+  def error
+    puts "Error at line #{@scanner.line}."
   end
 
   def start
@@ -31,13 +36,19 @@ class Parser
     def program_header
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "program"        
+      if @token['class'] == "keyword" && @token['lexeme'] == "program"        
         if identifier() == true
           increment()
-          if @token.class == "keyword" && @token.lexeme == "is"
+          if @token['class'] == "keyword" && @token['lexeme'] == "is"
             result = true
+          else
+            error()
           end
+        else
+          error()
         end
+      else
+        error()
       end
       return result
     end
@@ -54,21 +65,25 @@ class Parser
         increment()
         if program_statement() == true
           result = true
+        else
+          error()
         end
+      else
+        error()
       end
       return result
     end
 
     def program_declaration
       result = false      
-      if @token.class == "left_paren"        
+      if @token['class'] == "left_paren"        
         if declaration() == true
           increment()
-          if @token.class == "semi_colon"
+          if @token['class'] == "semi_colon"
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "begin"
+              if @token['class'] == "keyword" && @token['lexeme'] == "begin"
                 result = true
               else
                 program_declaration()
@@ -82,16 +97,16 @@ class Parser
 
     def program_statement
       result = false      
-      if @token.class == "left_paren"        
+      if @token['class'] == "left_paren"        
         if statement() == true
           increment()
-          if @token.class == "semi_colon"
+          if @token['class'] == "semi_colon"
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "end"
+              if @token['class'] == "keyword" && @token['lexeme'] == "end"
                 increment()
-                if @token.class == "keyword" && @token.lexeme == "program"
+                if @token['class'] == "keyword" && @token['lexeme'] == "program"
                   result = true
                 end
               else
@@ -110,7 +125,7 @@ class Parser
     def declaration
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "global"          
+      if @token['class'] == "keyword" && @token['lexeme'] == "global"          
         if procedure_declaration() == true || variable_declaration() == true
           result = true
         end
@@ -134,13 +149,13 @@ class Parser
     def procedure_header
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "procedure"
+      if @token['class'] == "keyword" && @token['lexeme'] == "procedure"
         if identifier() == true
           increment()
-          if @token.class == "left_paren"      
+          if @token['class'] == "left_paren"      
             if parameter_list() == true
               increment()
-              if @token.class == "right_paren"            
+              if @token['class'] == "right_paren"            
                 result = true                            
               end
             end
@@ -157,7 +172,7 @@ class Parser
       result = false
       if parameter() == true
         increment()
-        if @token.class == "comma"
+        if @token['class'] == "comma"
           if parameter_list() == true
             result = true
           end
@@ -173,11 +188,11 @@ class Parser
       result = false
       if variable_declaration() == true
         increment()
-        if @token.class == "left_paren"
+        if @token['class'] == "left_paren"
           @increment
-          if @token.class == "keyword" && @token.lexeme == "in" || @token.class == "keyword" && @token.lexeme == "out"
+          if @token['class'] == "keyword" && @token['lexeme'] == "in" || @token['class'] == "keyword" && @token['lexeme'] == "out"
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               result = true
             end
           end
@@ -205,14 +220,14 @@ class Parser
 
     def procedure_declaration
       result = false      
-      if @token.class == "left_paren"        
+      if @token['class'] == "left_paren"        
         if declaration() == true
           increment()
-          if @token.class == "semi_colon"
+          if @token['class'] == "semi_colon"
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "begin"
+              if @token['class'] == "keyword" && @token['lexeme'] == "begin"
                 result = true
               else
                 procedure_declaration()
@@ -226,16 +241,16 @@ class Parser
 
     def procedure_statement
       result = false      
-      if @token.class == "left_paren"        
+      if @token['class'] == "left_paren"        
         if statement() == true
           increment()
-          if @token.class == "semi_colon"
+          if @token['class'] == "semi_colon"
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "end"
+              if @token['class'] == "keyword" && @token['lexeme'] == "end"
                 increment()
-                if @token.class == "keyword" && @token.lexeme == "procedure"
+                if @token['class'] == "keyword" && @token['lexeme'] == "procedure"
                   result = true
                 end
               else
@@ -256,10 +271,10 @@ class Parser
       if type_mark() == true
         if identifier() == true
           increment()
-          if @token.class == "left_bracket"
+          if @token['class'] == "left_bracket"
             if array_size() == true
               increment()
-              if @token.class == "right_bracket"
+              if @token['class'] == "right_bracket"
                 result = true
               end
             end
@@ -277,14 +292,14 @@ class Parser
     def type_mark
       result = false
       increment()
-      if @token.class == "keyword"
-        if @token.lexeme == "integer"
+      if @token['class'] == "keyword"
+        if @token['lexeme'] == "integer"
           result = true
-        elsif @token.lexeme == "float"
+        elsif @token['lexeme'] == "float"
           result = true
-        elsif @token.lexeme == "bool"
+        elsif @token['lexeme'] == "bool"
           result = true
-        elsif @token.lexeme == "string"
+        elsif @token['lexeme'] == "string"
           result = true
         end
       end
@@ -312,10 +327,10 @@ class Parser
       result = false
       if identifier() == true
         increment()
-        if @token.class == "left_paren"
+        if @token['class'] == "left_paren"
           if argument_list() == true
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               result = true
             end
           end
@@ -339,10 +354,10 @@ class Parser
       result = false
       if identifier() == true
         increment
-        if @token.class == "left_bracket"
+        if @token['class'] == "left_bracket"
           if expression() ==  true
             increment()
-            if @token.class == "right_bracket"
+            if @token['class'] == "right_bracket"
               result = true
             end
           end
@@ -358,31 +373,31 @@ class Parser
     def if_statement
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "if"
+      if @token['class'] == "keyword" && @token['lexeme'] == "if"
         increment()
-        if @token.class == "left_paren"
+        if @token['class'] == "left_paren"
           if expression() == true
             increment()
-            if @token.class == "right_paren"
+            if @token['class'] == "right_paren"
               increment()
-              if @token.class == "keyword" && @token.lexeme == "then" && statement() == true                
+              if @token['class'] == "keyword" && @token['lexeme'] == "then" && statement() == true                
                 increment()
-                until @token.lexeme == "end" || @token.lexeme == "else"
+                until @token['lexeme'] == "end" || @token['lexeme'] == "else"
                   if statement() == true
                     increment()
-                    if @token.class != "semi_colon"
+                    if @token['class'] != "semi_colon"
                       return false
                     end
                   end
                 end
                 increment()
-                if @token.class == "keyword" && @token.lexeme == "else"
+                if @token['class'] == "keyword" && @token['lexeme'] == "else"
                   if statement() == true
                     increment()
-                    until @token.lexeme == "end"
+                    until @token['lexeme'] == "end"
                       if statement() == true
                         increment()
-                        if @token.class != "semi_colon"
+                        if @token['class'] != "semi_colon"
                           return false
                         end
                       end
@@ -390,7 +405,7 @@ class Parser
                   end
                 end
                 increment()
-                if @token.class == "keyword" && @token.lexeme == "if"
+                if @token['class'] == "keyword" && @token['lexeme'] == "if"
                   result = true
                 end                
               end
@@ -409,24 +424,24 @@ class Parser
     def loop_statement
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "for"
+      if @token['class'] == "keyword" && @token['lexeme'] == "for"
         increment()
-        if @token.class == "left_paren"
+        if @token['class'] == "left_paren"
           if assignment_statement() == true
             increment()
-            if @token.class == "semi_colon"
+            if @token['class'] == "semi_colon"
               if expression() == true
                 until statement() == true
                   statement()
                   increment()
-                  if @token.class != "semi_colon"
+                  if @token['class'] != "semi_colon"
                     return false
                   end
                 end
                 increment()
-                if @token.class == "keyword" && @token.lexeme == "end"
+                if @token['class'] == "keyword" && @token['lexeme'] == "end"
                   increment()
-                  if @token.class == "keyword" && @token.lexeme == "for"
+                  if @token['class'] == "keyword" && @token['lexeme'] == "for"
                     result = true
                   end
                 end
@@ -442,7 +457,7 @@ class Parser
     def return_statement
       result = false
       increment()
-      if @token.class == "keyword" && @token.lexeme == "return"
+      if @token['class'] == "keyword" && @token['lexeme'] == "return"
         result = true
       end
       return result
@@ -450,8 +465,8 @@ class Parser
 
     # <identifier> ::= [a-zA-Z][a-zA-Z0-9_]*
     def identifier
-      result =!(@next[/[a-zA-Z][a-zA-Z0-9_]*/]).nil?
       increment()
+      result = !(@token['lexeme'][/[a-zA-Z][a-zA-Z0-9_]*/]).nil?
       return result
     end
 
@@ -465,11 +480,11 @@ class Parser
         result = true
       elsif expression() == true
         increment()
-        if @token.class == "oprator" && @token.lexeme == "&"
+        if @token['class'] == "oprator" && @token['lexeme'] == "&"
           if arithmetic_operator() == true
             result = true
           end
-        elsif @token.class == "oprator" && @token.lexeme == "|"
+        elsif @token['class'] == "oprator" && @token['lexeme'] == "|"
           if arithmetic_operator() == true
             result = true
           end
@@ -488,11 +503,11 @@ class Parser
         result = true
       elsif arithmetic_operator() == true
         increment()
-        if @token.class == "operator" && @token.lexeme == "+"
+        if @token['class'] == "operator" && @token['lexeme'] == "+"
           if relation() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == "-"
+        elsif @token['class'] == "operator" && @token['lexeme'] == "-"
           if relation() == true
             result = true
           end
@@ -515,27 +530,27 @@ class Parser
         result = true
       elsif relation() == true
         increment()
-        if @token.class == "operator" && @token.lexeme == "<"
+        if @token['class'] == "operator" && @token['lexeme'] == "<"
           if term() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == ">="
+        elsif @token['class'] == "operator" && @token['lexeme'] == ">="
           if term() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == "<="
+        elsif @token['class'] == "operator" && @token['lexeme'] == "<="
           if term() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == ">"
+        elsif @token['class'] == "operator" && @token['lexeme'] == ">"
           if term() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == "=="
+        elsif @token['class'] == "operator" && @token['lexeme'] == "=="
           if term() == true
             result = true
           end
-        elsif @token.class == "operator" && @token.lexeme == "!="
+        elsif @token['class'] == "operator" && @token['lexeme'] == "!="
           if term() == true
             result = true
           end
@@ -552,10 +567,10 @@ class Parser
       result = false
       if term() == true
         increment()
-        if @token.class == "operator" 
-          if @token.lexeme == "*" && factor() == true
+        if @token['class'] == "operator" 
+          if @token['lexeme'] == "*" && factor() == true
             result = true
-          elsif @token.lexeme == "/" && factor() == true
+          elsif @token['lexeme'] == "/" && factor() == true
             result = true
           end
         end
@@ -575,12 +590,12 @@ class Parser
     def factor
       result = false
       increment()
-      if @token.class == "left_paren" && expression() == true        
+      if @token['class'] == "left_paren" && expression() == true        
         increment()
-        if @token.class == "right_paren"
+        if @token['class'] == "right_paren"
           result = true
         end        
-      elsif @token.class == "operator" && @token.lexeme == "-"        
+      elsif @token['class'] == "operator" && @token['lexeme'] == "-"        
         if name() == true
           result = true
         elsif number() == true
@@ -588,10 +603,10 @@ class Parser
         end
       elsif string() == true
         result = true
-      elsif @token.class == "keyword"
-        if @token.lexeme == "true"
+      elsif @token['class'] == "keyword"
+        if @token['lexeme'] == "true"
           result = true
-        elsif @token.lexeme == "false"
+        elsif @token['lexeme'] == "false"
           result = true
         end
       end
@@ -604,9 +619,9 @@ class Parser
       result = false
       if identifier() == true
         increment()
-        if @token.class == "left_bracket" && expression() == true          
+        if @token['class'] == "left_bracket" && expression() == true          
           increment()
-          if @token.class == "right_bracket"
+          if @token['class'] == "right_bracket"
             result = true
           end          
         end
@@ -621,7 +636,7 @@ class Parser
       result = false
       if expression() == true
         increment()
-        if @token.class == "comma"
+        if @token['class'] == "comma"
           if argument_list() == true
             result = true
           end
@@ -635,11 +650,11 @@ class Parser
     # <number> ::= [0-9][0-9_]*[.[0-9_]*]
     def number
       increment()
-      return @token.class == "integer"      
+      return @token['class'] == "integer"      
     end
 
     def string
       increment()
-      return @token.class == "string"
+      return @token['class'] == "string"
     end   
 end
