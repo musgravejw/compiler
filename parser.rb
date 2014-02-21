@@ -6,19 +6,25 @@
 require './scanner.rb'
 
 class Parser
-  @token = ""
+  @token = {}
+  @next = {}
 
   def initialize(filename)  	
-    @scanner = Scanner.new(filename)    
+    @scanner = Scanner.new(filename)
+    peek()
+  end
+
+  def peek
+    @next = @scanner.get_next_token()
   end
 
   def increment
-    @token = @scanner.get_next_token()
-    # puts @token
+    @token = @next
+    peek()
   end
 
-  def error
-    puts "Error at line #{@scanner.line}."
+  def error(str)
+    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
   end
 
   def start
@@ -34,21 +40,22 @@ class Parser
 
     # <program_header> ::= program <identifier> is
     def program_header
-      result = false
-      increment()
-      if @token['class'] == "keyword" && @token['lexeme'] == "program"        
+      result = false      
+      return false if @next.nil?
+      if @next['class'] == "keyword" && @next['lexeme'] == "program"
+        increment()
         if identifier() == true
           increment()
-          if @token['class'] == "keyword" && @token['lexeme'] == "is"
+          if @next['class'] == "keyword" && @next['lexeme'] == "is"
             result = true
           else
-            error()
+            error("program_header")
           end
         else
-          error()
+          error("program_header")
         end
       else
-        error()
+        error("program_header")
       end
       return result
     end
@@ -59,36 +66,35 @@ class Parser
     #     ( <statement> ; )*
     #   end program
     def program_body
-      result = false
-      increment()
+      result = false      
+      increment()      
       if program_declaration() == true
-        increment()
+        increment()        
         if program_statement() == true
           result = true
         else
-          error()
+          error("program statement")
         end
       else
-        error()
+        error("program declaration")
       end
       return result
     end
 
     def program_declaration
+      # include zero declarations
       result = false      
-      if @token['class'] == "left_paren"        
-        if declaration() == true
+      #if @next['class'] == "left_paren"      
+      if declaration() == true
+        increment()        
+        if @next['class'] == "semi_colon"          
+          #increment()
+          #if @next['class'] == "right_paren"
           increment()
-          if @token['class'] == "semi_colon"
-            increment()
-            if @token['class'] == "right_paren"
-              increment()
-              if @token['class'] == "keyword" && @token['lexeme'] == "begin"
-                result = true
-              else
-                program_declaration()
-              end              
-            end
+          if @next['class'] == "keyword" && @next['lexeme'] == "begin"
+            result = true            
+          else
+            result = program_declaration()
           end
         end
       end
@@ -96,26 +102,26 @@ class Parser
     end
 
     def program_statement
-      result = false      
-      if @token['class'] == "left_paren"        
-        if statement() == true
+      result = false
+      #if @next['class'] == "left_paren"
+      if statement() == true
+        increment()
+        if @next['class'] == "semi_colon"
+          #increment()
+          #if @next['class'] == "right_paren"
           increment()
-          if @token['class'] == "semi_colon"
+          if @next['class'] == "keyword" && @next['lexeme'] == "end"
             increment()
-            if @token['class'] == "right_paren"
-              increment()
-              if @token['class'] == "keyword" && @token['lexeme'] == "end"
-                increment()
-                if @token['class'] == "keyword" && @token['lexeme'] == "program"
-                  result = true
-                end
-              else
-                program_statement()
-              end              
+            if @next['class'] == "keyword" && @next['lexeme'] == "program"
+              result = true
             end
-          end
+          else
+            result = program_statement()
+          end              
+        #end
         end
       end
+      #end
       return result
     end
 
@@ -123,15 +129,14 @@ class Parser
     #   [ global ] <procedure_declaration>
     # | [ global ] <variable_declaration>
     def declaration
-      result = false
-      increment()
-      if @token['class'] == "keyword" && @token['lexeme'] == "global"          
+      result = false      
+      if @next['class'] == "keyword" && @next['lexeme'] == "global"          
         if procedure_declaration() == true || variable_declaration() == true
-          result = true
+          result = true          
         end
-      else
-        if procedure_declaration() == true || variable_declaration() == true
-          result = true
+      else        
+       if procedure_declaration() == true || variable_declaration() == true          
+          result = true          
         end
       end
       return result
@@ -139,23 +144,23 @@ class Parser
 
     # <procedure_declaration> ::= 
     #   <procedure_header> <procedure_body>
-    def procedure_declaration
+    def procedure_declaration      
       return procedure_header() && procedure_body()
     end
 
     # <procedure_header> :: = 
     #   procedure <identifier> 
     #     ( [<parameter_list>] )
-    def procedure_header
-      result = false
-      increment()
-      if @token['class'] == "keyword" && @token['lexeme'] == "procedure"
+    def procedure_header      
+      result = false            
+      if @next['class'] == "keyword" && @next['lexeme'] == "procedure"
+        increment()        
         if identifier() == true
           increment()
-          if @token['class'] == "left_paren"      
+          if @next['class'] == "left_paren"
+            increment()            
             if parameter_list() == true
-              increment()
-              if @token['class'] == "right_paren"            
+              if @next['class'] == "right_paren"                
                 result = true                            
               end
             end
@@ -169,13 +174,13 @@ class Parser
     #   <parameter> , <parameter_list>
     # | <parameter>
     def parameter_list
+      #puts "\n=> Called parameter_list\n"
       result = false
       if parameter() == true
-        increment()
-        if @token['class'] == "comma"
-          if parameter_list() == true
-            result = true
-          end
+        increment()        
+        if @next['class'] == "comma"
+          increment()
+          result = parameter_list()
         else
           result = true
         end
@@ -185,18 +190,18 @@ class Parser
 
     # <parameter> ::= <variable_declaration> (in | out)
     def parameter
-      result = false
+      #puts "\n=> Called parameter\n"
+      result = false      
       if variable_declaration() == true
-        increment()
-        if @token['class'] == "left_paren"
-          @increment
-          if @token['class'] == "keyword" && @token['lexeme'] == "in" || @token['class'] == "keyword" && @token['lexeme'] == "out"
-            increment()
-            if @token['class'] == "right_paren"
-              result = true
-            end
-          end
+        #increment()
+        #if @token['class'] == "left_paren"        
+        increment()        
+        if @next['class'] == "keyword" && @next['lexeme'] == "in" || @next['class'] == "keyword" && @next['lexeme'] == "out"          
+          #if @token['class'] == "right_paren"
+          result = true
+          #end
         end
+        #end
       end
       return result      
     end
@@ -209,57 +214,63 @@ class Parser
     def procedure_body
       result = false
       increment()
-      if procedure_declaration() == true
+      if procedure_body_declaration() == true
         increment()
-        if procedure_statement() == true
+        if procedure_body_statement() == true
           result = true
         end
       end
       return result
     end
 
-    def procedure_declaration
+    def procedure_body_declaration      
       result = false      
-      if @token['class'] == "left_paren"        
-        if declaration() == true
+      #if @next['class'] == "left_paren"        
+      if declaration() == true
+        increment()
+        if @next['class'] == "semi_colon"
+          #increment()
+          #if @next['class'] == "right_paren"
           increment()
-          if @token['class'] == "semi_colon"
-            increment()
-            if @token['class'] == "right_paren"
-              increment()
-              if @token['class'] == "keyword" && @token['lexeme'] == "begin"
-                result = true
-              else
-                procedure_declaration()
-              end              
-            end
+          if @next['class'] == "keyword" && @next['lexeme'] == "begin"
+            result = true
+          else
+            result = procedure_body_declaration()         
           end
+          #end
         end
+      else        
+        if @next['class'] == "keyword" && @next['lexeme'] == "begin"          
+          result = true
+        else
+          result = procedure_body_declaration()
+        end 
       end
+      #end
       return result
     end
 
-    def procedure_statement
+    def procedure_body_statement
       result = false      
-      if @token['class'] == "left_paren"        
-        if statement() == true
+      #if @next['class'] == "left_paren"        
+      if statement() == true
+        increment()
+        if @next['class'] == "semi_colon"
           increment()
-          if @token['class'] == "semi_colon"
+          #if @next['class'] == "right_paren"
+          increment()
+          if @next['class'] == "keyword" && @next['lexeme'] == "end"
             increment()
-            if @token['class'] == "right_paren"
-              increment()
-              if @token['class'] == "keyword" && @token['lexeme'] == "end"
-                increment()
-                if @token['class'] == "keyword" && @token['lexeme'] == "procedure"
-                  result = true
-                end
-              else
-                procedure_statement()
-              end              
+            if @next['class'] == "keyword" && @next['lexeme'] == "procedure"
+              result = true
             end
+          else
+            result = procedure_body_statement()
           end
-        end
+          #end
+        end      
       end
+      #end
       return result
     end
 
@@ -267,19 +278,22 @@ class Parser
     #   <type_mark> <identifier> 
     #   [ [ <array_size> ] ]
     def variable_declaration
-      result = false
+      #puts "\n=> Called variable_declaration\n\n"
+      result = false      
       if type_mark() == true
+        increment()
         if identifier() == true
-          increment()
-          if @token['class'] == "left_bracket"
-            if array_size() == true
-              increment()
-              if @token['class'] == "right_bracket"
+          if @next['class'] == "left_bracket"
+            if array_size() == true              
+              if @next['class'] == "right_bracket"
                 result = true
-              end
+                increment()              
+              end            
             end
-          end
-        end
+          else
+            result = true            
+          end        
+        end      
       end
       return result      
     end
@@ -289,18 +303,17 @@ class Parser
     # | float
     # | bool
     # | string
-    def type_mark
+    def type_mark      
       result = false
-      increment()
-      if @token['class'] == "keyword"
-        if @token['lexeme'] == "integer"
-          result = true
-        elsif @token['lexeme'] == "float"
-          result = true
-        elsif @token['lexeme'] == "bool"
-          result = true
-        elsif @token['lexeme'] == "string"
-          result = true
+      if @next['class'] == "keyword"
+        if @next['lexeme'] == "int"
+          result = true          
+        elsif @next['lexeme'] == "float"
+          result = true          
+        elsif @next['lexeme'] == "bool"
+          result = true          
+        elsif @next['lexeme'] == "string"
+          result = true          
         end
       end
       return result
@@ -341,7 +354,7 @@ class Parser
 
     # <assignment_statement> ::=
     #   <destination> := <expression>
-    def assigment_statement
+    def assignment_statement
       # *****************
       # string literal :=
       # *****************
@@ -464,10 +477,8 @@ class Parser
     end
 
     # <identifier> ::= [a-zA-Z][a-zA-Z0-9_]*
-    def identifier
-      increment()
-      result = !(@token['lexeme'][/[a-zA-Z][a-zA-Z0-9_]*/]).nil?
-      return result
+    def identifier      
+      return !(@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?
     end
 
     # <expression> ::=
@@ -648,13 +659,11 @@ class Parser
     end
 
     # <number> ::= [0-9][0-9_]*[.[0-9_]*]
-    def number
-      increment()
-      return @token['class'] == "integer"      
+    def number     
+      return @next['class'] == "integer"
     end
 
     def string
-      increment()
-      return @token['class'] == "string"
+      return @next['class'] == "string"
     end   
 end
