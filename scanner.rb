@@ -158,7 +158,7 @@ class Scanner
       if token.empty?
         token = get_next_token()
       end
-      puts token
+      #puts token
       file.close()
     end
     return token
