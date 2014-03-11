@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 # compiler.rb
 # Written by John Musgrave
 #   Main compiler runtime
