@@ -172,48 +172,135 @@ class Parser
   end
 
   def expression
-    if expression
+    if arithmetic_operator
       next!
-      if check("operator", "&") || check("operator", "|") || check("operator", "!")
+      e_prime
+    end
+  end
+
+  def e_prime
+    if check("operator", "&")
+      next!
+      if arithmetic_operator
         next!
-        arithmetic_operator      
+        e_prime
+      end
+    elsif check("operator", "|")
+      next!
+      if arithmetic_operator
+        next!
+        e_prime
+      end
+    elsif check("keyword", "not")
+      next!
+      if arithmetic_operator
+        next!
+        e_prime
+      end
+    else 
+      if arithmetic_operator
+        next!
+        e_prime
       end
     end
   end
 
   def arithmetic_operator
-    if arithmetic_operator
+   if relation
+    next!
+    a_prime
+   end
+  end
+
+  def a_prime
+    if check("operator", "+")
       next!
-      if check("operator", "+") || check("operator", "-")
+      if relation
         next!
-        relation
-      else
-        relation
-      end      
+        a_prime
+      end
+    elsif check("operator", "-")
+      next!
+      if relation
+        next!
+        a_prime
+      end
+    else
+      relation
     end
   end
 
   def relation
-    if relation
+    if term
       next!
-      if check("operator", "<") || check("operator", ">=") || check("operator", "<=") || check("operator", ">") || check("operator", "==") || check("operator", "!=")
+      r_prime
+    end
+  end
+
+  def r_prime
+    if check("operator", "<")
+      next!
+      if term
         next!
-        term
-      else
-        term
+        r_prime
       end
+    elsif check("operator", "<=")
+      next!
+      if term
+        next!
+        r_prime
+      end
+    elsif check("operator", ">=")
+      next!
+      if term
+        next!
+        r_prime
+      end
+    elsif check("operator", ">")
+      next!
+      if term
+        next!
+        r_prime
+      end
+    elsif check("operator", "==")
+      next!
+      if term
+        next!
+        r_prime
+      end
+    elsif check("operator", "!=")
+      next!
+      if term
+        next!
+        r_prime
+      end
+    else      
+     term
     end
   end
 
   def term
-    if term
+    if factor
       next!
-      if check("operator", "*") || check("operator", "/")
+      t_prime
+    end
+  end
+
+  def t_prime
+    if check("operator", "*")
+      next!
+      if factor
         next!
-        factor
-      else
-        factor
+        t_prime
       end
+    elsif check("operator", "/")
+      next!
+      if factor
+        next!
+        t_prime
+      end
+    else      
+      factor      
     end
   end
 
