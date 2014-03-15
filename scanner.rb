@@ -4,34 +4,29 @@
 #   Identifies the token class of each lexeme.
 
 class Scanner
-  @line = 0
-  @col = 0
-  @error = ""  
-  @filename = ""
-  @symbol_table = []
-
-  @whitespace = []
-  @operators = []
-  @keywords = []
-  @left_paren = ""
-  @right_paren = ""
-  @left_brace = ""
-  @right_brace = ""
-  @left_bracker = ""
-  @right_bracket = ""
-  @semi_colon = ""
-  @assignment = ""
-  @colon = ""
-  @comma = ""
-  @colon_equals = ""  
-
   attr_accessor :line, :col
 
   def initialize(file)
     @line = 1
     @col = 0
-    @error = ""
+    @error = ""  
+    @filename = ""
     @symbol_table = []
+    @whitespace = []
+    @operators = []
+    @keywords = []
+    @left_paren = ""
+    @right_paren = ""
+    @left_brace = ""
+    @right_brace = ""
+    @left_bracker = ""
+    @right_bracket = ""
+    @semi_colon = ""
+    @assignment = ""
+    @colon = ""
+    @comma = ""
+    @colon_equals = ""      
+    @symbol_table = []    
     @filename = file
     set_symbols()
   end

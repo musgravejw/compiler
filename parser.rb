@@ -5,10 +5,9 @@
 
 require './scanner.rb'
 
-class Parser
-  @next = {}   
-
-  def initialize(filename)  	
+class Parser  
+  def initialize(filename)
+    @next = {}
     @scanner = Scanner.new(filename)    
   end
 

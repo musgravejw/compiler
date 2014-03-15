@@ -7,11 +7,10 @@
 require './parser.rb'
 
 class Compiler
-  @line = 0
-  @error = ""
-  @scanner = nil
-
   def initialize(filename)    
+    @line = 0
+    @error = ""
+    @scanner = nil
     @parser = Parser.new(filename)
     @parser.start()
   end
