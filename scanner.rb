@@ -148,7 +148,7 @@ class Scanner
         i += 1        
       end
       if token['class'].nil? && lexeme.size > 0        
-        token = create_token(lexeme)      # match multi-character symbols        
+        token = create_token(lexeme)    
       end
       if token.empty?
         token = get_next_token()
@@ -187,11 +187,11 @@ class Scanner
     end
 
     def is_string?(str)
-      return !(str.match("/\"[a-zA-Z0-9 _,;:.']*\"/")).nil?
+      return !(str.match(/\"[a-zA-Z0-9 _,;:.']*\"/)).nil?
     end
 
     def is_numeric?(str)
-      return !(str.match("/[0-9][0-9_]*[.[0-9_]*]?/")).nil?
+      return !(str.match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
     end
 
     def set_symbols()

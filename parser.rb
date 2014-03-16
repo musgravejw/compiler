@@ -12,7 +12,8 @@ class Parser
   end
 
   def next!
-    @next = @scanner.get_next_token
+    # abort if check("whitespace", "EOF")
+    @next = @scanner.get_next_token 
     puts @next
   end
 
@@ -21,7 +22,7 @@ class Parser
   end
 
   def error(str)
-    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
+    abort "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
   end
 
   def start
@@ -92,8 +93,7 @@ class Parser
   end
 
   def statement            
-    return true
-    # return assignment_statement || if_statement || loop_statement || return_statement || procedure_call
+    return assignment_statement || if_statement || loop_statement || return_statement || procedure_call
   end
 
   def procedure_declaration    
@@ -159,7 +159,8 @@ class Parser
       next!
       if check("colon_equals", ":=")
         next!
-        expression
+        result = expression
+        puts (result == true).to_s
       end
     end
   end
@@ -171,9 +172,9 @@ class Parser
     end
   end
 
-  def expression
+  def expression    
     if arithmetic_operator
-      next!
+      next!      
       e_prime
     end
   end
@@ -197,19 +198,19 @@ class Parser
         next!
         e_prime
       end
-    else 
-      if arithmetic_operator
+    elsif arithmetic_operator
         next!
         e_prime
-      end
+    else
+      error("expression")
     end
   end
 
-  def arithmetic_operator
-   if relation
-    next!
-    a_prime
-   end
+  def arithmetic_operator    
+    if relation
+      next!
+      a_prime
+    end
   end
 
   def a_prime
@@ -225,8 +226,11 @@ class Parser
         next!
         a_prime
       end
+    elsif relation
+      next!
+      return true
     else
-      relation
+      error("arithmetic operator")
     end
   end
 
@@ -274,8 +278,11 @@ class Parser
         next!
         r_prime
       end
-    else      
-     term
+    elsif term
+      next!
+      return true
+    else
+      error("relation")
     end
   end
 
@@ -299,8 +306,11 @@ class Parser
         next!
         t_prime
       end
-    else      
-      factor      
+    elsif factor
+      next!
+      return true
+    else
+      error("term")
     end
   end
 
@@ -314,19 +324,36 @@ class Parser
     elsif check("operator", "-")
       next!
       if name || number
+        next!
         return true
       end
     elsif string
+      next!
       return true
     elsif check("keyword", "true") || check("keyword", "false")
+      next!
       return true
+    elsif name || number
+      next!
+      return true
+    else
+      error("factor")
     end
   end
 
   def name
-    if identifier
+    if identifier 
+      next!     
       return true
     end
+  end
+
+  def number
+    return !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
+  end
+
+  def string
+    return !(@next['lexeme'].match(/\"[a-zA-Z0-9 _,;:.']*\"/)).nil?
   end
 
   def if_statement
