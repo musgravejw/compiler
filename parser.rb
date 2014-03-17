@@ -22,7 +22,7 @@ class Parser
   end
 
   def error(str)
-    abort "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
+    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
   end
 
   def start
@@ -30,12 +30,10 @@ class Parser
     return program
   end
   
-  def program    
-    result = program_header
-    if result == true
+  def program            
+    if program_header
       next!
-      result = program_body
-      if result == true
+      if program_body
         puts "Parse completed successfully."
       end
     end
@@ -52,18 +50,18 @@ class Parser
   end
 
   def program_body
-    if program_declaration            
+    until !program_declaration || check("keyword", "begin")
       next!
-      if check("keyword", "begin")
+    end    
+    if check("keyword", "begin")
+      next!
+      until !program_statement || check("keyword", "end")
         next!
-        if program_statement
-          next!
-          if check("keyword", "end")
-            next!
-            check("keyword", "program")            
-          end
-        end        
-      end
+      end              
+      if check("keyword", "end")
+        next!
+        check("keyword", "program")
+      end      
     end
   end
 
@@ -77,14 +75,17 @@ class Parser
 
   def program_statement
     # handle Kleene *
-    if statement
-      next!
+    if statement    
       check("semi_colon", ";")
     end
   end
 
   def identifier    
-    return !(@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?    
+    unless check("whitespace", "EOF")
+      return !(@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?    
+    else
+      return false
+    end   
   end
 
   def declaration
@@ -92,13 +93,12 @@ class Parser
     return procedure_declaration || variable_declaration
   end
 
-  def statement            
+  def statement
     return assignment_statement || if_statement || loop_statement || return_statement || procedure_call
   end
 
-  def procedure_declaration    
-    result = procedure_header 
-    if result == true
+  def procedure_declaration        
+    if procedure_header
       next!
       procedure_body
     end
@@ -118,6 +118,7 @@ class Parser
       if identifier
         next!
         if check("left_paren", "(")
+          next!
           if parameter_list
             next!
             check("right_paren", ")")            
@@ -144,14 +145,26 @@ class Parser
   end
 
   def type_mark    
-    return (check("keyword", "int") || check("keyword", "float") || check("keyword", "bool") || check("keyword", "string"))
+    return check("keyword", "int" || check("keyword", "float") || check("keyword", "bool") || check("keyword", "string"))
   end
 
   def parameter_list
-    next!
-    next!
-    next!
-    return true
+    if parameter
+      next!
+      if check("comma", ",")
+        next!
+        parameter_list
+      else
+        return true
+      end
+    end
+  end
+
+  def parameter
+    if variable_declaration
+      next!
+      check("keyword", "in") || check("keyword", "in")
+    end
   end
 
   def assignment_statement
@@ -159,8 +172,7 @@ class Parser
       next!
       if check("colon_equals", ":=")
         next!
-        result = expression
-        puts (result == true).to_s
+        expression
       end
     end
   end
@@ -172,14 +184,11 @@ class Parser
     end
   end
 
-  def expression    
-    if arithmetic_operator
-      next!      
-      e_prime
-    end
+  def expression
+    arithmetic_operator || e_prime
   end
 
-  def e_prime
+  def e_prime    
     if check("operator", "&")
       next!
       if arithmetic_operator
@@ -199,18 +208,15 @@ class Parser
         e_prime
       end
     elsif arithmetic_operator
-        next!
-        e_prime
+      next!
+      e_prime
     else
       error("expression")
     end
   end
 
-  def arithmetic_operator    
-    if relation
-      next!
-      a_prime
-    end
+  def arithmetic_operator
+    relation || a_prime
   end
 
   def a_prime
@@ -235,10 +241,7 @@ class Parser
   end
 
   def relation
-    if term
-      next!
-      r_prime
-    end
+    term || r_prime
   end
 
   def r_prime
@@ -287,10 +290,7 @@ class Parser
   end
 
   def term
-    if factor
-      next!
-      t_prime
-    end
+    factor || t_prime
   end
 
   def t_prime
@@ -337,12 +337,12 @@ class Parser
       next!
       return true
     else
-      error("factor")
+      return false
     end
   end
 
   def name
-    if identifier 
+    if identifier
       next!     
       return true
     end
@@ -353,21 +353,36 @@ class Parser
   end
 
   def string
-    return !(@next['lexeme'].match(/\"[a-zA-Z0-9 _,;:.']*\"/)).nil?
+    unless check("whitespace", "EOF")
+      return !(@next['lexeme'].match(/\"[a-zA-Z0-9 _,;:.']*\"/)).nil?
+    else
+      return false
+    end
   end
 
-  def if_statement
+  def if_statement    
     if check("keyword", "if")
       next!
-      if expression
+      if check("left_paren", "(")
         next!
-        if check("keyword", "then")
-          next!
-          if statement
+        if expression
+          if check("right_paren", ")")            
             next!
-            if check("keyword", "end")
+            if check("keyword", "then")              
               next!
-              check("keyword", "if")
+              until !statement || check("keyword", "else") || check("keyword", "end")
+                next!
+              end
+              if check("keyword", "else")
+                next!
+                until !statement || check("keyword", "else")
+                  next!
+                end 
+              end
+              if check("keyword", "end")
+                next!
+                check("keyword", "if")
+              end              
             end
           end
         end
@@ -382,10 +397,12 @@ class Parser
         next!
         if assignment_statement
           next!
-          if check("right_paren", ")")
-            next!
-            if statement
+          if expression
+            if check("right_paren", ")")
               next!
+              until !statement || check("keyword", "end")
+                next!
+              end
               if check("keyword", "end")
                 next!
                 check("keyword", "for")
