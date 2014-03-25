@@ -36,8 +36,8 @@ class Parser
     return program
   end
   
-  private
 
+  private
     # <program> ::= 
     #   <program_header> <program_body>
     #
