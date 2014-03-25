@@ -1,6 +1,6 @@
 # parser.rb
 # Abstract:  LL(1) Recursive Descent parser
-#   Uses scanner to build abstract syntax tree
+#   Uses scanner to build the parse table
 #   Grammar requirements for each method are stated in BNF notaion above
 
 require './scanner.rb'
