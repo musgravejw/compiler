@@ -28,7 +28,7 @@ class Parser
   end
 
   def error(str)
-    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" for token '#{@next['lexeme']}'."
+    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" expected '#{@next['lexeme']}'."
   end
 
   def start
@@ -46,7 +46,11 @@ class Parser
         next!
         if program_body
           puts "Parse completed successfully."
+        else
+          error("program body")
         end
+      else
+        error("program header")
       end
     end
 
@@ -58,8 +62,16 @@ class Parser
         next! 
         if identifier
           next!
-          check("keyword", "is")
+          if check("keyword", "is")
+            return true
+          else
+            error("keyword is")
+          end
+        else
+          error("identifier")
         end
+      else
+        error("keyword program")
       end    
     end
 
@@ -81,24 +93,36 @@ class Parser
         end              
         if check("keyword", "end")
           next!
-          check("keyword", "program")
+          if check("keyword", "program")
+            return true
+          else
+            error("keyword program")
+          end
+        else
+          error("keyword end")
         end      
+      else
+        error("keyword begin")
       end
     end
 
     
-    def program_declaration
-      # handle Kleene *    
+    def program_declaration         
       if declaration
         next!
         check("semi_colon", ";")
+        declaration
+      else 
+        return true
       end
     end
 
     def program_statement
-      # handle Kleene *
       if statement    
         check("semi_colon", ";")
+        statement
+      else
+        return true
       end
     end
 
@@ -140,6 +164,8 @@ class Parser
         return_statement
       elsif first("procedure")
         procedure_call
+      else
+        error("statement")
       end      
     end
 
@@ -157,6 +183,10 @@ class Parser
       end      
     end
 
+
+    # <procedure_declaration> ::= 
+    #   <procedure_header> <procedure_body>
+    #
     def procedure_declaration        
       if procedure_header
         next!
@@ -178,8 +208,14 @@ class Parser
           if array_size
             next!
             check("right_bracket", "]")
+          else
+            error("array size")
           end
+        else
+          error("left bracket")
         end
+      else
+        error("type mark")
       end
     end
 
@@ -204,10 +240,22 @@ class Parser
             next!
             if parameter_list
               next!
-              check("right_paren", ")")            
+              if check("right_paren", ")")
+                return true
+              else
+                error("right paren")
+              end
+            else
+              error("parameter list")
             end
+          else
+            error("left paren")
           end
+        else
+          error("identifier")
         end
+      else
+        error("keyword procedure")
       end
     end
 
@@ -228,9 +276,17 @@ class Parser
             if check("keyword", "end")
               next!                
               check("keyword", "procedure")
+            else
+              error("keyword end")
             end
+          else
+            error("program statement")
           end        
+        else
+          error("keyword begin")
         end
+      else
+        error("program declaration")
       end
     end
 
@@ -255,10 +311,16 @@ class Parser
         next!
         if check("comma", ",")
           next!
-          parameter_list
+          if parameter_list
+            return true
+          else
+            error("parameter list")
+          end
         else
           return true
         end
+      else
+        error("parameter")
       end
     end
 
@@ -269,6 +331,8 @@ class Parser
       if variable_declaration
         next!
         check("keyword", "in") || check("keyword", "in")
+      else
+        error("variable declaration")
       end
     end
 
@@ -281,8 +345,16 @@ class Parser
         next!
         if check("colon_equals", ":=")
           next!
-          expression
+          if expression
+            return true
+          else
+            error("expression")
+          end
+        else
+          error("colon equals")
         end
+      else
+        error("destination")
       end
     end
 
@@ -293,7 +365,9 @@ class Parser
     def destination
       if identifier
         next!
-        return true      
+        return true 
+      else
+        error("identifier")     
       end
     end
 
@@ -486,6 +560,7 @@ class Parser
         next!
         return true
       else
+        error("symbol")
         return false
       end
     end
@@ -498,6 +573,8 @@ class Parser
       if identifier
         next!     
         return true
+      else
+        error("identifier")
       end
     end
 
@@ -543,15 +620,34 @@ class Parser
                   until !statement || check("keyword", "else")
                     next!
                   end 
+                else
+                  error("keyword else")
                 end
+
                 if check("keyword", "end")
                   next!
-                  check("keyword", "if")
-                end              
+                  if check("keyword", "if")
+                    return true
+                  else
+                    error("keyword if")
+                  end
+                else
+                  error("keyword end")
+                end 
+              else
+                error("keyword then")
               end
+            else
+              error("right paren")
             end
+          else
+            error("expression")
           end
+        else
+          error("left paren")
         end
+      else
+        error("keyword if")
       end
     end
 
@@ -577,12 +673,28 @@ class Parser
                 end
                 if check("keyword", "end")
                   next!
-                  check("keyword", "for")
+                  if check("keyword", "for")
+                    return true
+                  else
+                    error("keyword for")
+                  end
+                else
+                  error("keyword end")
                 end
+              else
+                error("right paren")
               end
+            else
+              error("expression")
             end
+          else
+            error("assignment statement")
           end
+        else
+          error("left paren")
         end
+      else
+        error("keyword for")
       end
     end
 
@@ -590,7 +702,11 @@ class Parser
     # <return_statement> ::= return
     #
     def return_statement 
-      check("keyword", "return")
+      if check("keyword", "return")
+        return true
+      else
+        error("keyword return")
+      end
     end
 
 
@@ -604,9 +720,19 @@ class Parser
           next!
           if argument_list
             next!
-            check("right_paren", ")")
+            if check("right_paren", ")")
+              return true
+            else
+              error("right paren")
+            end
+          else
+            error("argument list")
           end
+        else
+          error("left paren")
         end
+      else
+        error("identifier")
       end
     end
 
@@ -620,10 +746,16 @@ class Parser
         next!
         if check("comma", ",")
           next!
-          argument_list
+          if argument_list
+            return true
+          else
+            error("argument list")
+          end
         else
           return true
         end
+      else
+        error(expression)
       end
     end
 end
