@@ -28,7 +28,7 @@ class Parser
   end
 
   def error(str)
-    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  \"invalid #{str}\" expected '#{@next['lexeme']}'."
+    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  invalid symbol \"#{@next['lexeme']}\" expected '#{str}'."
   end
 
   def start
@@ -155,7 +155,7 @@ class Parser
     #
     def statement
       if first("assignment")
-        assignment
+        assignment_statement
       elsif first("if")
         if_statement
       elsif first("loop")
@@ -191,6 +191,8 @@ class Parser
       if procedure_header
         next!
         procedure_body
+      else
+        error("procedure header")
       end
     end
 
