@@ -11,7 +11,7 @@ Written by [John Musgrave](http://johnmusgrave.com).
 
 <table>
 <tr><td><b>Milestone</b></td><td><b>Status</b></td></tr>
-<tr><td>Scanner</td><td>Completed</td></tr>
+<tr><td>Lexical Analyzer</td><td>Completed</td></tr>
 <tr><td>Parser</td><td>Completed</td></tr>
 <tr><td>Semantic Analysis</td><td>Development</td></tr>
 <tr><td>Code Generation</td><td>Incomplete</td></tr>
