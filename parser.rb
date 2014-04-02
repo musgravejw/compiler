@@ -109,7 +109,7 @@ class Parser
     
     def program_declaration      
       if declaration
-        next!
+        #next!
         if check("semi_colon", ";")
           return true
         else
@@ -165,8 +165,10 @@ class Parser
     #   | <return_statement>
     #   | <procedure_call>
     #
-    def statement      
-      if first("if")
+    def statement 
+      if first("assignment")
+        assignment_statement     
+      elsif first("if")
         if_statement
       elsif first("loop")
         loop_statement
@@ -174,8 +176,6 @@ class Parser
         return_statement
       elsif first("procedure")
         procedure_call
-      elsif first("assignment")
-        assignment_statement
       end      
     end
 
@@ -262,7 +262,7 @@ class Parser
           if check("left_paren", "(")
             next!
             if parameter_list
-              next!
+              #next!
               if check("right_paren", ")")                
                 return true
               else
@@ -351,8 +351,8 @@ class Parser
     # <parameter> ::= <variable_declaration> (in | out)
     #
     def parameter
-      if variable_declaration        
-        if check("keyword", "in") || check("keyword", "in")          
+      if variable_declaration    
+        if check("keyword", "in") || check("keyword", "out")
           return true
         else
           error("in || out")
@@ -648,6 +648,7 @@ class Parser
         if check("left_paren", "(")
           next!
           if expression
+            next!
             if check("right_paren", ")")            
               next!
               if check("keyword", "then")
@@ -661,6 +662,7 @@ class Parser
                     next!
                   end                 
                 end
+                next!
                 next!
                 if check("keyword", "if")
                   next!
@@ -760,13 +762,15 @@ class Parser
               error("right paren")
             end
           else
-            error("argument list")
+            if check("right_paren", ")")
+              return true
+            else
+              error("right paren")
+            end
           end
         else
           error("left paren")
         end
-      else
-        error("identifier")
       end
     end
 
