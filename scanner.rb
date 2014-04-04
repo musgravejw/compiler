@@ -11,7 +11,6 @@ class Scanner
     @col = 0
     @error = ""  
     @filename = ""
-    @symbol_table = []
     @whitespace = []
     @operators = []
     @keywords = []
@@ -26,7 +25,6 @@ class Scanner
     @colon = ""
     @comma = ""
     @colon_equals = ""      
-    @symbol_table = []    
     @filename = file
     set_symbols()
   end
@@ -178,7 +176,6 @@ class Scanner
         token['class'] = "identifier" unless !is_identifier? lexeme
       end      
       token['lexeme'] = lexeme
-      #@symbol_table.push(token)
       return token
     end
 

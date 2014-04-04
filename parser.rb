@@ -1,12 +1,14 @@
 # parser.rb
 # Abstract:  LL(1) Recursive Descent parser
 #   Uses scanner to build the parse table
+#   Incorporates type checking
 #   Grammar requirements for each method are stated in BNF notaion above
 
 require './scanner.rb'
 
 class Parser  
   def initialize(filename)
+    @symbol_table = []
     @next = {}
     @scanner = Scanner.new(filename)    
   end
@@ -19,6 +21,16 @@ class Parser
 
   def check(token_class, lexeme)
     return (token_class == @next['class'] && lexeme == @next['lexeme'])    
+  end
+
+  def symbol(name, type, scope)
+    record = {
+      :name => name,
+      :type => type,
+      :scope => scope
+    }
+
+    @symbol_table << record
   end
 
   def resync(token_class, lexeme)
@@ -61,6 +73,7 @@ class Parser
       if check("keyword", "program")     
         next! 
         if identifier
+          symbol(@next["lexeme"], "program", "program_header")
           next!
           if check("keyword", "is")
             return true
@@ -149,7 +162,7 @@ class Parser
     #   | [ global ] <variable_declaration>
     #
     def declaration
-      if check("keyword", "global")  
+      if check("keyword", "global")
         next!
         return procedure_declaration || variable_declaration  
       else
@@ -258,6 +271,7 @@ class Parser
       if check("keyword", "procedure")
         next!
         if identifier
+          symbol(@next["lexeme"], "procedure", "procedure_header")
           next!
           if check("left_paren", "(")
             next!
