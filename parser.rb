@@ -5,12 +5,13 @@
 #   Grammar requirements for each method are stated in BNF notaion above
 
 require './scanner.rb'
+require './types.rb'
 
 class Parser  
   def initialize(filename)
-    @symbol_table = []
     @next = {}
-    @scanner = Scanner.new(filename)    
+    @scanner = Scanner.new(filename)  
+    @symbol_table = SymbolTable.new  
   end
 
   def next!    
@@ -21,16 +22,6 @@ class Parser
 
   def check(token_class, lexeme)
     return (token_class == @next['class'] && lexeme == @next['lexeme'])    
-  end
-
-  def add_symbol(name, type, scope)
-    record = {
-      :name => name,
-      :type => type,
-      :scope => scope
-    }
-
-    @symbol_table << record
   end
 
   def resync(token_class, lexeme)
@@ -73,7 +64,6 @@ class Parser
       if check("keyword", "program")     
         next! 
         if identifier
-          add_symbol(@next["lexeme"], "program", "program_header")
           next!
           if check("keyword", "is")
             return true
@@ -271,7 +261,6 @@ class Parser
       if check("keyword", "procedure")
         next!
         if identifier
-          add_symbol(@next["lexeme"], "procedure", "procedure_header")
           next!
           if check("left_paren", "(")
             next!
