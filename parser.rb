@@ -23,7 +23,7 @@ class Parser
     return (token_class == @next['class'] && lexeme == @next['lexeme'])    
   end
 
-  def symbol(name, type, scope)
+  def add_symbol(name, type, scope)
     record = {
       :name => name,
       :type => type,
@@ -73,7 +73,7 @@ class Parser
       if check("keyword", "program")     
         next! 
         if identifier
-          symbol(@next["lexeme"], "program", "program_header")
+          add_symbol(@next["lexeme"], "program", "program_header")
           next!
           if check("keyword", "is")
             return true
@@ -271,7 +271,7 @@ class Parser
       if check("keyword", "procedure")
         next!
         if identifier
-          symbol(@next["lexeme"], "procedure", "procedure_header")
+          add_symbol(@next["lexeme"], "procedure", "procedure_header")
           next!
           if check("left_paren", "(")
             next!
