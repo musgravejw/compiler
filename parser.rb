@@ -44,7 +44,7 @@ class Parser
     # <program> ::= 
     #   <program_header> <program_body>
     #
-    def program            
+    def program
       if program_header
         next!        
         if program_body
@@ -60,7 +60,8 @@ class Parser
 
     # <program_header> ::= program <identifier> is
     #
-    def program_header    
+    def program_header
+      @symbol_table.enter_scope
       if check("keyword", "program")     
         next! 
         if identifier
@@ -97,6 +98,7 @@ class Parser
         if check("keyword", "end")
           next!
           if check("keyword", "program")
+            @symbol_table.exit_scope
             return true
           else
             error("keyword program")
