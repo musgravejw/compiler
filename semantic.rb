@@ -9,9 +9,6 @@ class SymbolTable
   	@table << {}
   end
 
-  def check_scope
-  end
-
   def add_symbol(symbol)
     unless @table[-1].has_key? symbol[:name]
       @table[-1][symbol[:name]] = symbol

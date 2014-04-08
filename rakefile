@@ -1,0 +1,5 @@
+task :default => [:test]
+
+task :test do
+  ruby "./compiler.rb ./tests/correct/test_program.src"
+end

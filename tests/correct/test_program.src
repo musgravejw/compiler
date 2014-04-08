@@ -25,5 +25,5 @@ program test_program is
 begin
     fibb_result := -1234;
     fibb(12, fibb_result);
-    putInteger(fibb_result);
+    
 end program

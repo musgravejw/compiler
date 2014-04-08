@@ -5,7 +5,7 @@
 #   Grammar requirements for each method are stated in BNF notaion above
 
 require './scanner.rb'
-require './types.rb'
+require './semantic.rb'
 
 class Parser
   def initialize(filename)
@@ -19,7 +19,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    #puts @next
+    puts @next
   end
 
   def check(token_class, lexeme)
