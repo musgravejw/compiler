@@ -1,4 +1,4 @@
-Compiler [![Build Status](https://travis-ci.org/musgravejw/compiler.svg?branch=master)
+Compiler ![Build Status](https://travis-ci.org/musgravejw/compiler.svg?branch=master)
 ========
 This is a project written in Ruby to demonstrate compiler theory concepts.
 The compiler is a single pass LL(1) recursive descent compiler built from a custom grammar.
