@@ -61,7 +61,6 @@ class Parser
     # <program_header> ::= program <identifier> is
     #
     def program_header
-      @symbol_table.enter_scope
       if check("keyword", "program")     
         next! 
         if identifier
@@ -89,7 +88,8 @@ class Parser
     def program_body
       while program_declaration
         next!
-      end      
+      end
+      @symbol_table.enter_scope
       if check("keyword", "begin")
         next!
         while program_statement
@@ -112,7 +112,7 @@ class Parser
     end
 
     
-    def program_declaration      
+    def program_declaration
       if declaration
         #next!
         if check("semi_colon", ";")
@@ -170,7 +170,8 @@ class Parser
     #   | <return_statement>
     #   | <procedure_call>
     #
-    def statement 
+    def statement
+      @symbol_table.enter_scope
       if first("assignment")
         assignment_statement     
       elsif first("if")
@@ -181,13 +182,19 @@ class Parser
         return_statement
       elsif first("procedure")
         procedure_call
-      end      
+      end
+      @symbol_table.exit_scope
     end
 
     def first(alpha)
       if alpha == "assignment"
         unless @next["class"] == "keyword"
-          identifier
+          #puts @symbol_table.inspect
+          #symbol = @symbol_table.find_symbol(@next["lexeme"])
+          #symbol ||= {}
+          #unless symbol["type"] == "procedure"
+            identifier
+          #end
         end
       elsif alpha == "if"        
         check("keyword", "if")
@@ -197,7 +204,7 @@ class Parser
         check("keyword", "return")
       elsif alpha == "procedure"
         check("left_paren", "(")
-      end      
+      end
     end
 
 
@@ -218,7 +225,7 @@ class Parser
     #   <type_mark> <identifier> 
     #   [ [ <array_size> ] ]
     #
-    def variable_declaration    
+    def variable_declaration      
       if type_mark
         next!
         if identifier          
@@ -423,7 +430,9 @@ class Parser
     #   | [ not ] <arithOp>
     #
     def expression
+      @symbol_table.enter_scope
       arithmetic_operator || e_prime
+      @symbol_table.exit_scope
     end
 
     def e_prime    
