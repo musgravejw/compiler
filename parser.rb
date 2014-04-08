@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 # parser.rb
 # Abstract:  LL(1) Recursive Descent parser
 #   Uses scanner to build the parse table

@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 # scanner.rb
 # John Musgrave
 # Abstract:  This is the scanner to handle our lexical analysis.  

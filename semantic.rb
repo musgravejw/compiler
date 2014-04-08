@@ -1,3 +1,10 @@
+#!/usr/bin/ruby
+
+# semantic.rb
+# Written by John Musgrave
+#   Creates a symbol table for use in scope and type checking
+
+
 class SymbolTable
   def initialize
   	@table = []
