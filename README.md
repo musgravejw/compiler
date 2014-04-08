@@ -1,3 +1,5 @@
+(https://travis-ci.org/musgravejw/compiler.svg?branch=master)
+
 Compiler
 ========
 This is a project written in Ruby to demonstrate compiler theory concepts.
