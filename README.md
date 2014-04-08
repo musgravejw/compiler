@@ -1,4 +1,4 @@
-(https://travis-ci.org/musgravejw/compiler.svg?branch=master)
+https://travis-ci.org/musgravejw/compiler.svg?branch=master
 
 Compiler
 ========
