@@ -2,24 +2,25 @@ class SymbolTable
   def initialize
   	@table = []
     # @table[0] // global
-  	@table << []
+  	@table << {}
   end
 
   def enter_scope
-  	@table << []
+  	@table << {}
   end
 
   def check_scope
   end
 
   def add_symbol(symbol)
-    @table[-1]
-    #[symbol.name] = symbol
+    unless @table[-1].has_key? symbol[:name]
+      @table[-1][symbol[:name]] = symbol
+    end
   end
 
   def find_symbol(name)
-    @table[-1]
-    #[name]
+    # [-1]?
+    @table[0][name]
   end
 
   def exit_scope
