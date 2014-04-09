@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 # parser.rb
+# John Musgrave
 # Abstract:  LL(1) Recursive Descent parser
 #   Uses scanner to build the parse table
 #   Incorporates type checking

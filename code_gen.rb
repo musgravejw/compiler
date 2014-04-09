@@ -1,8 +1,9 @@
 #!/usr/bin/ruby
 
 # code_gen.rb
-# Written by John Musgrave
-#   Code generation
+# John Musgrave
+# Abstract
+#   Class for code generation
 class CodeGen
   def initialize
   end
