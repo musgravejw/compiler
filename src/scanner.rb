@@ -147,13 +147,13 @@ class Scanner
         end
         i += 1        
       end
-      if token['class'].nil? && lexeme.size > 0        
+      if token['class'].nil? && lexeme.size > 0
+        lexeme.downcase!
         token = create_token(lexeme)    
       end
       if token.empty?
         token = get_next_token()
       end
-      #puts token
       file.close()
     end
     return token
