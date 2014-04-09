@@ -4,7 +4,8 @@
 # Written by John Musgrave
 #   Main compiler invocation
 
-require './parser.rb'
+dir = File.dirname(__FILE__)
+require "#{dir}/parser.rb"
 
 class Compiler
   def initialize(filename)    

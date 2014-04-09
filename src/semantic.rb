@@ -4,7 +4,8 @@
 # John Musgrave
 # Abstract:  Creates a symbol table for use in scope and type checking
 
-require './runtime.rb'
+dir = File.dirname(__FILE__)
+require "#{dir}/runtime.rb"
 
 class SymbolTable
   def initialize

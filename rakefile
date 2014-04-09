@@ -1,9 +1,9 @@
 task :default => [:test]
 
 task :test do
-  ruby "./compiler.rb ./tests/correct/test_program.src"
+  ruby "./src/compiler.rb ./tests/correct/test_program.src"
   puts
-  ruby "./compiler.rb ./tests/correct/test_program_minimal.src"
+  ruby "./src/compiler.rb ./tests/correct/test_program_minimal.src"
   puts
-  ruby "./compiler.rb ./tests/correct/test_heap.src"
+  ruby "./src/compiler.rb ./tests/correct/test_heap.src"
 end

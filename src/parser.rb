@@ -6,9 +6,9 @@
 #   Uses scanner to build the parse table
 #   Incorporates type checking
 #   Grammar requirements for each method are stated in BNF notaion above
-
-require './scanner.rb'
-require './semantic.rb'
+dir = File.dirname(__FILE__)
+require "#{dir}/scanner.rb"
+require "#{dir}/semantic.rb"
 
 class Parser
   def initialize(filename)
