@@ -2,8 +2,9 @@
 
 # semantic.rb
 # John Musgrave
-# Abstract:
-#   Creates a symbol table for use in scope and type checking
+# Abstract:  Creates a symbol table for use in scope and type checking
+
+require './runtime.rb'
 
 class SymbolTable
   def initialize
