@@ -9,9 +9,10 @@ require "#{dir}/runtime.rb"
 
 class SymbolTable
   def initialize
+    r = Runtime.new
   	@table = []
-    # @table[0] // global
-  	@table << {}
+    @table << r.load_runtime
+  	@table << {}    
   end
 
   def enter_scope

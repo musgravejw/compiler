@@ -4,6 +4,7 @@
 # John Musgrave
 # Abstract
 #   Class for code generation
+
 class CodeGen
   def initialize
   end

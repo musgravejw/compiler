@@ -6,6 +6,7 @@
 #   Uses scanner to build the parse table
 #   Incorporates type checking
 #   Grammar requirements for each method are stated in BNF notaion above
+
 dir = File.dirname(__FILE__)
 require "#{dir}/scanner.rb"
 require "#{dir}/semantic.rb"
