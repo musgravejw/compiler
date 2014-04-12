@@ -13,7 +13,7 @@
 # 	  integer putFloat(float)
 # 	  integer putString(string)
 
-def class Runtime
+class Runtime
   def load_runtime
     {
       getBool: {name: "getBool", type: "bool"},
