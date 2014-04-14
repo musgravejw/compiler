@@ -15,15 +15,25 @@
 
 class Runtime
   def load_runtime
+    #{
+      #getBool: {name: "getBool", type: "bool"},
+      #getInteger: {name: "getInteger", type: "integer"},
+      #getFloat: {name: "getFloat", type: "string"},
+      #getString: {name: "getString", type: "string"},
+      #putBool: {name: "putBool", type: "integer"},
+      #putInteger: {name: "putInteger", type: "integer"},
+      #putFloat: {name: "putFloat", type: "integer"},
+      #putString: {name: "putString", type: "integer"},
+    #}
     {
-      getBool: {name: "getBool", type: "bool"},
-      getInteger: {name: "getInteger", type: "integer"},
-      getFloat: {name: "getFloat", type: "string"},
-      getString: {name: "getString", type: "string"},
-      putBool: {name: "putBool", type: "integer"},
-      putInteger: {name: "putInteger", type: "integer"},
-      putFloat: {name: "putFloat", type: "integer"},
-      putString: {name: "putString", type: "integer"},
+      "getBool" => {name: "getBool", type: "procedure"},
+      "getInteger" =>{name: "getInteger", type: "procedure"},
+      "getFloat" => {name: "getFloat", type: "procedure"},
+      "getString" => {name: "getString", type: "procedure"},
+      "putBool" => {name: "putBool", type: "procedure"},
+      "putInteger" => {name: "putInteger", type: "procedure"},
+      "putFloat" => {name: "putFloat", type: "procedure"},
+      "putString" => {name: "putString", type: "procedure"},
     }
   end
 end

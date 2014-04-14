@@ -26,8 +26,8 @@ class SymbolTable
   end
 
   def find_symbol(name)
-    # [-1]?
-    @table[0][name]
+    result = @table[1][name]
+    result ||= @table[0][name]
   end
 
   def exit_scope

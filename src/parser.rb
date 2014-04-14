@@ -23,7 +23,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    # puts @next
+    puts @next
   end
 
   def check(token_class, lexeme)
@@ -150,6 +150,7 @@ class Parser
     def identifier
       unless check("whitespace", "EOF")
         unless (@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?
+          puts "new identifier." + @symbol_table.inspect
           @name = @next["lexeme"]
           @symbol_table.add_symbol({
             name: @name,
@@ -187,6 +188,7 @@ class Parser
     #
     def statement
       @symbol_table.enter_scope
+      puts "NEW SCOPE"
       if first("assignment")
         assignment_statement        
       elsif first("if")
@@ -206,7 +208,7 @@ class Parser
         unless @next["class"] == "keyword"
           symbol = @symbol_table.find_symbol(@next["lexeme"])
           symbol ||= {}
-          unless symbol[:type] == "procedure"
+          unless symbol["type"] == "procedure"
             identifier
           end
         end
@@ -220,7 +222,7 @@ class Parser
         unless @next["class"] == "keyword"
           symbol = @symbol_table.find_symbol(@next["lexeme"])
           symbol ||= {}
-          if symbol[:type] == "procedure"
+          if symbol["type"] == "procedure"
             procedure_call            
           end
         end
@@ -701,7 +703,6 @@ class Parser
         if check("left_paren", "(")
           next!
           if expression
-            next!
             next!
             if check("right_paren", ")")            
               next!
