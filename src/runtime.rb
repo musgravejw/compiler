@@ -26,14 +26,14 @@ class Runtime
       #putString: {name: "putString", type: "integer"},
     #}
     {
-      "getBool" => {name: "getBool", type: "procedure"},
-      "getInteger" =>{name: "getInteger", type: "procedure"},
-      "getFloat" => {name: "getFloat", type: "procedure"},
-      "getString" => {name: "getString", type: "procedure"},
-      "putBool" => {name: "putBool", type: "procedure"},
-      "putInteger" => {name: "putInteger", type: "procedure"},
-      "putFloat" => {name: "putFloat", type: "procedure"},
-      "putString" => {name: "putString", type: "procedure"},
+      "getbool" => {name: "getbool", type: "procedure"},
+      "getinteger" =>{name: "getinteger", type: "procedure"},
+      "getfloat" => {name: "getfloat", type: "procedure"},
+      "getstring" => {name: "getstring", type: "procedure"},
+      "putbool" => {name: "putbool", type: "procedure"},
+      "putinteger" => {name: "putinteger", type: "procedure"},
+      "putfloat" => {name: "putfloat", type: "procedure"},
+      "putstring" => {name: "putstring", type: "procedure"},
     }
   end
 end

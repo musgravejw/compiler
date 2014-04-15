@@ -150,7 +150,7 @@ class Parser
     def identifier
       unless check("whitespace", "EOF")
         unless (@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?
-          puts "new identifier." + @symbol_table.inspect
+          # puts "new identifier." + @symbol_table.inspect + "\n\n"
           @name = @next["lexeme"]
           @symbol_table.add_symbol({
             name: @name,
@@ -188,7 +188,6 @@ class Parser
     #
     def statement
       @symbol_table.enter_scope
-      puts "NEW SCOPE"
       if first("assignment")
         assignment_statement        
       elsif first("if")
@@ -205,10 +204,10 @@ class Parser
 
     def first(alpha)      
       if alpha == "assignment"
-        unless @next["class"] == "keyword"
-          symbol = @symbol_table.find_symbol(@next["lexeme"])
-          symbol ||= {}
-          unless symbol["type"] == "procedure"
+        symbol = @symbol_table.find_symbol(@next["lexeme"])
+        if symbol
+          #puts "got here" + symbol.to_s
+          unless symbol[:type] == "procedure"
             identifier
           end
         end
@@ -222,7 +221,7 @@ class Parser
         unless @next["class"] == "keyword"
           symbol = @symbol_table.find_symbol(@next["lexeme"])
           symbol ||= {}
-          if symbol["type"] == "procedure"
+          if symbol[:type] == "procedure"
             procedure_call            
           end
         end
@@ -416,9 +415,9 @@ class Parser
     #   <destination> := <expression>
     #
     def assignment_statement
-      if destination        
+      if destination
         if check("colon_equals", ":=")
-          next!          
+          next!
           if expression       
             return true
           else
@@ -466,10 +465,8 @@ class Parser
     #   | <expression> | <arithOp>
     #   | [ not ] <arithOp>
     #
-    def expression      
-      @symbol_table.enter_scope
+    def expression
       arithmetic_operator || e_prime
-      @symbol_table.exit_scope
     end
 
     def e_prime
@@ -507,7 +504,7 @@ class Parser
     #
     def arithmetic_operator
       result = relation || a_prime
-      if check("operator", "+")
+      if @next["class"] == "operator"
         return a_prime
       else
         return result
@@ -517,15 +514,10 @@ class Parser
     def a_prime      
       if check("operator", "+")
         next!
-        if relation
-          a_prime
-        end
+        relation
       elsif check("operator", "-")
         next!
-        if relation
-          next!
-          a_prime
-        end
+        relation
       elsif !@next["class"] == "keyword" && relation
         next!
         return true
@@ -543,46 +535,33 @@ class Parser
     #   | <term>
     #
     def relation
-      term || r_prime
+      result = term || r_prime
+      if @next["class"] == "operator"
+        return r_prime
+      else
+        return result
+      end
     end
 
     def r_prime
       if check("operator", "<")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif check("operator", "<=")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif check("operator", ">=")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif check("operator", ">")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif check("operator", "==")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif check("operator", "!=")
         next!
-        if term
-          next!
-          r_prime
-        end
+        term
       elsif term
         next!
         return true
@@ -663,7 +642,7 @@ class Parser
     # <name> ::= 
     #   <identifier> [ [ <expression> ] ]
     #
-    def name      
+    def name
       if identifier
         #next!     
         # check brackets
@@ -703,11 +682,10 @@ class Parser
         if check("left_paren", "(")
           next!
           if expression
-            next!
             if check("right_paren", ")")            
               next!
-              if check("keyword", "then")
-                next!                
+              if check("keyword", "then")                
+                next!                                
                 until check("keyword", "else") || check("keyword", "end") || !statement
                   next!
                 end
@@ -719,7 +697,7 @@ class Parser
                 end
                 if check("keyword", "end")
                   next!
-                  if check("keyword", "if")
+                  if check("keyword", "if")                    
                     next!
                     return true
                   else
@@ -813,13 +791,12 @@ class Parser
     # <procedure_call> ::=
     #   <identifier> ( [<argument_list>] )
     #
-    def procedure_call
+    def procedure_call      
       if identifier
         next!
-        if check("left_paren", "(")
+        if check("left_paren", "(")          
           next!
           if argument_list
-            next!            
             if check("right_paren", ")")  
               next!            
               return true
@@ -847,19 +824,14 @@ class Parser
     #
     def argument_list
       if expression
-        next!
         if check("comma", ",")
           next!
-          if argument_list
-            return true
-          else
-            error("argument list")
-          end
+          argument_list
         else
           return true
         end
       else
-        error(expression)
+        error("expression")
       end
     end
 end
