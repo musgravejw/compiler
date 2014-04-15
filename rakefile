@@ -3,7 +3,7 @@ task :default => [:test]
 task :test do
   #ruby "./compiler.rb ./tests/correct/fromJake.src"
   puts
-  #ruby "./compiler.rb ./tests/correct/test_heap.src"
+  ruby "./compiler.rb ./tests/correct/test_heap.src"
   puts
   ruby "./compiler.rb ./tests/correct/test_program.src"
   puts
