@@ -67,15 +67,21 @@ class Scanner
 
       row.each_char do |c|      # look at each character 
         if i >= @col            # ignore if we've checked it before
-          if c == "\n"          
+          if c == "\n" || c == "\\"       
             @line += 1
             @col = 0
-            break   
-          elsif @whitespace.include? c            
+            break
+          elsif c == "\"" || (lexeme.size > 0 && lexeme[0] == "\"")
+            @col += 1
+            if  c == "\"" && lexeme.size > 1
+              lexeme += c 
+              break
+            else
+              lexeme += c            
+            end
+          elsif @whitespace.include? c
             @col += 1
             break
-          #elsif c == "/" && row[i-1] == "/"
-            #@col += 1      
           elsif lexeme.size == 0
             if @left_paren == c
               @col += 1
@@ -117,9 +123,9 @@ class Scanner
               token['class'] = "comma"
               token['lexeme'] = c
               break
-            else            
+            else
               @col += 1
-              lexeme += c              
+              lexeme += c
             end
           else
             case c
@@ -138,14 +144,14 @@ class Scanner
             when @semi_colon
               break            
             when @comma
-              break                    
-            else            
+              break
+            else
               @col += 1
               lexeme += c              
             end
           end
         end
-        i += 1        
+        i += 1
       end
       if token['class'].nil? && lexeme.size > 0
         lexeme.downcase!
@@ -163,20 +169,20 @@ class Scanner
 
     def create_token(lexeme)
       token = {}
-      # check the token class      
-      if is_numeric? lexeme        
+      # check the token class 
+      if is_numeric? lexeme
         token['class'] = "integer"
       elsif is_string? lexeme
         token['class'] = "string"
       elsif @operators.include? lexeme
         token['class'] = "operator"      
       elsif @keywords.include? lexeme
-        token['class'] = "keyword"     
+        token['class'] = "keyword"
       elsif lexeme == @colon_equals
-        token['class'] = "colon_equals"      
+        token['class'] = "colon_equals"
       else
         token['class'] = "identifier" unless !is_identifier? lexeme
-      end      
+      end
       token['lexeme'] = lexeme
       return token
     end

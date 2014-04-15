@@ -23,7 +23,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    puts @next
+    #puts @next
   end
 
   def check(token_class, lexeme)
@@ -134,7 +134,7 @@ class Parser
 
     def program_statement
       if statement
-        if check("semi_colon", ";")          
+        if check("semi_colon", ";")
           return true
         else
           #error("semi colon")
@@ -189,7 +189,7 @@ class Parser
     def statement
       @symbol_table.enter_scope
       if first("assignment")
-        assignment_statement        
+        assignment_statement   
       elsif first("if")
         if_statement
       elsif first("loop")
@@ -250,12 +250,11 @@ class Parser
       @type = "variable"
       if type_mark
         next!
-        if identifier          
+        if identifier
           next!          
           if check("left_bracket", "[")
             next!
             if array_size
-              next!
               if check("right_bracket", "]")
                 next!
                 return true
@@ -418,7 +417,7 @@ class Parser
       if destination
         if check("colon_equals", ":=")
           next!
-          if expression       
+          if expression
             return true
           else
             error("expression")
@@ -437,16 +436,15 @@ class Parser
     #
     def destination
       if identifier
-        next!
-        if check("left_brace", "[")
+        next!        
+        if check("left_bracket", "[")
           next!
           if expression
-            next!
-            if check("right_brace", "]")
+            if check("right_bracket", "]")
               next!
               return true
             else
-              error("right brace")
+              error("right bracket")
             end
           else
             error("expression")
@@ -563,7 +561,6 @@ class Parser
         next!
         term
       elsif term
-        next!
         return true
       else
         #error("relation")
@@ -594,7 +591,6 @@ class Parser
           t_prime
         end
       elsif factor
-        next!
         return true
       else
         #error("term")
@@ -620,7 +616,6 @@ class Parser
       elsif check("operator", "-")
         next!
         if name || number
-          next!
           return true
         end
       elsif string
@@ -629,11 +624,9 @@ class Parser
       elsif check("keyword", "true") || check("keyword", "false")
         next!
         return true
-      elsif name || number        
-        next!
+      elsif name || number
         return true
       else
-        #error("symbol")
         return false
       end
     end
@@ -644,9 +637,22 @@ class Parser
     #
     def name
       if identifier
-        #next!     
-        # check brackets
-        return true
+        next!
+        if check("left_bracket", "[")
+          next!
+          if expression
+            if check("right_bracket", "]")
+              next!
+              return true
+            else
+              error("right bracket")
+            end
+          else
+            error("array size")
+          end       
+        else
+          return true   
+        end
       else
         #error("identifier")
       end
@@ -656,7 +662,9 @@ class Parser
     # <number> ::= [0-9][0-9_]*[.[0-9_]*]
     #
     def number
-      return !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
+      result = !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
+      next!
+      return result
     end
 
 
@@ -664,7 +672,7 @@ class Parser
     #
     def string
       unless check("whitespace", "EOF")
-        return !(@next['lexeme'].match(/\"[a-zA-Z0-9 _,;:.']*\"/)).nil?
+        return !(@next['lexeme'].match(/"[a-zA-Z0-9 _,;:.']*"/)).nil?
       else
         return false
       end
@@ -734,21 +742,18 @@ class Parser
         if check("left_paren", "(")
           next!
           if assignment_statement
-            next!            
-            next!
             if check("semi_colon", ";")
               next!
               if expression
-                next!
-                next!
                 if check("right_paren", ")")
                   next!
                   until !statement || check("keyword", "end")
                     next!
-                  end
+                  end                  
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
+                      next!
                       return true
                     else
                       error("keyword for")
@@ -791,14 +796,14 @@ class Parser
     # <procedure_call> ::=
     #   <identifier> ( [<argument_list>] )
     #
-    def procedure_call      
+    def procedure_call
       if identifier
         next!
         if check("left_paren", "(")          
-          next!
+          next!          
           if argument_list
-            if check("right_paren", ")")  
-              next!            
+            if check("right_paren", ")")
+              next!
               return true
             else
               error("right paren")
