@@ -5,21 +5,27 @@
 # Abstract
 #   Class for code generation
 
-# c := a + b;
-# d : = a + c + b;
-#
-# ;c := a + b;
-# R[1] = MM[44]; assumes variable a is at location 44
-# R[2] = MM[56];
-# R[1] = R[1] + R[2];
-# MM[32] = R[1];
-# ;d : = a + c + b;
-# R[1] = MM[44];
-# R[2] = MM[68];
-# R[1] = R[1] + R[2];
-# MM[44] = R[1];
-
 class CodeGen
   def initialize
+  	@register = 0
+  	@program = ""
+  end
+
+  def reg
+  	@register
+  end
+
+  def inc
+  	@register += 1
+  end
+
+  def gen(str)
+  	@program += str
+  end
+
+  def op(r1, r2, operator)
+  	gen("R[1] = #{r1};")
+  	gen("R[2] = #{r2};")
+  	gen("R[1] = R[1] #{operator} R[2];")
   end
 end

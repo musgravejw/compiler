@@ -10,6 +10,7 @@
 dir = File.dirname(__FILE__)
 require "#{dir}/scanner.rb"
 require "#{dir}/semantic.rb"
+require "#{dir}/code_gen.rb"
 
 class Parser
   def initialize(filename)
@@ -17,7 +18,9 @@ class Parser
     @next = {}
     @name = ""
     @type = ""
+    @operation = ""
     @symbol_table = SymbolTable.new
+    @generator = CodeGen.new
   end
 
   def next!
@@ -150,7 +153,6 @@ class Parser
     def identifier
       unless check("whitespace", "EOF")
         unless (@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?
-          # puts "new identifier." + @symbol_table.inspect + "\n\n"
           @name = @next["lexeme"]
           @symbol_table.add_symbol({
             name: @name,
@@ -206,7 +208,6 @@ class Parser
       if alpha == "assignment"
         symbol = @symbol_table.find_symbol(@next["lexeme"])
         if symbol
-          #puts "got here" + symbol.to_s
           unless symbol[:type] == "procedure"
             identifier
           end
@@ -350,7 +351,7 @@ class Parser
 
 
     # <type_mark> ::=
-    #     integer
+    #     int
     #   | float
     #   | bool
     #   | string
@@ -574,26 +575,39 @@ class Parser
     #   | <factor>
     #
     def term
-      factor || t_prime
+      type = factor
+      if type
+        return type
+      else
+        t_prime(type)
+      end
     end
 
-    def t_prime
+    def t_prime(type)
+      type = ""
       if check("operator", "*")
+        @operation = "*"
         next!
-        if factor
+        type = factor
+        if type
           next!
-          t_prime
+          t = t_prime(type)
+          generator.op(type, t, @operation)
         end
       elsif check("operator", "/")
+        @operation = "/"
         next!
-        if factor
+        type = factor
+        if type
           next!
-          t_prime
+          t = t_prime(type)
+          generator.op(type, t, @operation)
         end
-      elsif factor
-        return true
       else
-        #error("term")
+        type = factor
+        if type
+          return type
+        end
       end
     end
 
@@ -609,6 +623,7 @@ class Parser
     def factor
       if check("left_paren", "(")
         next!
+        # return expression type
         if expression
           next!
           check("right_paren", ")")
@@ -619,12 +634,19 @@ class Parser
           return true
         end
       elsif string
+        generator.gen("R[" + generator.reg +"] = " + @next.lexeme)
         next!
-        return true
-      elsif check("keyword", "true") || check("keyword", "false")
+        return 'string'
+      elsif check("keyword", "true")
+        generator.gen("R[" + generator.reg +"] = 1")
         next!
-        return true
+        return 'bool'
+      elsif check("keyword", "false")
+        generator.gen("R[" + generator.reg +"] = 0")
+        next!
+        return 'bool'
       elsif name || number
+        # return type of name or number
         return true
       else
         return false
