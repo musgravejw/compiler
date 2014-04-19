@@ -351,14 +351,14 @@ class Parser
 
 
     # <type_mark> ::=
-    #     int
+    #     integer
     #   | float
     #   | bool
     #   | string
     #
     def type_mark
-      if check("keyword", "int") 
-        @type = "int"
+      if check("keyword", "int") || check("keyword", "integer")
+        @type = "integer"
         return true
       elsif check("keyword", "float") 
         @type = "float"
@@ -470,28 +470,42 @@ class Parser
 
     def e_prime
       if check("operator", "&")
+        @operation = "&"
         next!
-        if arithmetic_operator
+        type = arithmetic_operator
+        if type
           next!
-          e_prime
+          t = e_prime
+          @generator.op(type, t, @operation)
+          return t
         end
       elsif check("operator", "|")
+        @operation = "|"
         next!
-        if arithmetic_operator
+        type = arithmetic_operator
+        if type
           next!
-          e_prime
+          t = e_prime
+          @generator.op(type, t, @operation)
+          return t
         end
       elsif check("keyword", "not")
         next!
-        if arithmetic_operator
+        type = arithmetic_operator
+        if type
           next!
-          e_prime
+          t = e_prime
+          @generator.op(type, t, @operation)
+          return t
         end
-      elsif arithmetic_operator
-        next!
-        e_prime
       else
-        #error("expression")
+        type = arithmetic_operator
+        if type
+          next!
+          t = e_prime
+          @generator.op(type, t, @operation)
+          return t
+        end
       end
     end
 
@@ -502,19 +516,24 @@ class Parser
     #   | <relation>
     #
     def arithmetic_operator
-      result = relation || a_prime
+      type = relation
+      type ||= a_prime
       if @next["class"] == "operator"
-        return a_prime
+        t = a_prime
+        @generator.op(type, t, @operation)
+        return t
       else
-        return result
+        return type
       end
     end
 
-    def a_prime      
+    def a_prime
       if check("operator", "+")
+        @operation = "+"
         next!
         relation
       elsif check("operator", "-")
+        @operation = "-"
         next!
         relation
       elsif !@next["class"] == "keyword" && relation
@@ -534,37 +553,44 @@ class Parser
     #   | <term>
     #
     def relation
-      result = term || r_prime
+      type = term
+      type ||= r_prime
       if @next["class"] == "operator"
-        return r_prime
+        t = r_prime
+        @generator.op(type, t, @operation)
+        return t
       else
-        return result
+        return type
       end
     end
 
     def r_prime
       if check("operator", "<")
+        @operation = "<"
         next!
         term
       elsif check("operator", "<=")
+        @operation = "<="
         next!
         term
       elsif check("operator", ">=")
+        @operation = ">="
         next!
         term
       elsif check("operator", ">")
+        @operation = ">"
         next!
         term
       elsif check("operator", "==")
+        @operation = "=="
         next!
         term
       elsif check("operator", "!=")
+        @operation = "!="
         next!
         term
-      elsif term
-        return true
       else
-        #error("relation")
+        term
       end
     end
 
@@ -579,7 +605,7 @@ class Parser
       if type
         return type
       else
-        t_prime(type)
+        t_prime("")
       end
     end
 
@@ -605,9 +631,6 @@ class Parser
         end
       else
         type = factor
-        if type
-          return type
-        end
       end
     end
 
@@ -621,20 +644,24 @@ class Parser
     #   | false
     #
     def factor
+      current = @next['lexeme']
       if check("left_paren", "(")
         next!
-        # return expression type
-        if expression
+        type = expression
+        if type
           next!
           check("right_paren", ")")
+          return type
         end
       elsif check("operator", "-")
         next!
-        if name || number
-          return true
-        end
+        current = @next['lexeme']
+        type = name
+        type ||= number
+        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
+        return type
       elsif string
-        @generator.gen("R[" + @generator.reg.to_s + "] = " + @next['lexeme'])
+        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
         next!
         return 'string'
       elsif check("keyword", "true")
@@ -644,12 +671,13 @@ class Parser
       elsif check("keyword", "false")
         @generator.gen("R[" + @generator.reg.to_s + "] = 0")
         next!
-        return 'bool'
-      elsif name || number
-        # return type of name or number
-        return true
+        return 'bool'      
       else
-        return false
+        current = @next['lexeme']
+        type = name
+        type ||= number
+        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
+        return type
       end
     end
 
@@ -665,7 +693,7 @@ class Parser
           if expression
             if check("right_bracket", "]")
               next!
-              return true
+              return 'name'
             else
               error("right bracket")
             end
@@ -673,7 +701,7 @@ class Parser
             error("array size")
           end       
         else
-          return true   
+          return 'name'   
         end
       else
         #error("identifier")
@@ -686,7 +714,9 @@ class Parser
     def number
       result = !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
       next!
-      return result
+      if result
+        return 'number'
+      end
     end
 
 

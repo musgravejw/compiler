@@ -21,11 +21,15 @@ class CodeGen
 
   def gen(str)
   	@program += str
+  	#puts str
   end
 
   def op(r1, r2, operator)
-  	gen("R[1] = #{r1};")
-  	gen("R[2] = #{r2};")
-  	gen("R[1] = R[1] #{operator} R[2];")
+  	# if the types match
+    if r1 == r2
+  	  gen("R[1] = R[0] #{operator} R[1];")
+  	else
+  	  puts "Type mismatch"
+  	end
   end
 end
