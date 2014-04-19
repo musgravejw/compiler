@@ -592,7 +592,7 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          generator.op(type, t, @operation)
+          @generator.op(type, t, @operation)
         end
       elsif check("operator", "/")
         @operation = "/"
@@ -601,7 +601,7 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          generator.op(type, t, @operation)
+          @generator.op(type, t, @operation)
         end
       else
         type = factor
@@ -634,15 +634,15 @@ class Parser
           return true
         end
       elsif string
-        generator.gen("R[" + generator.reg +"] = " + @next.lexeme)
+        @generator.gen("R[" + @generator.reg.to_s + "] = " + @next['lexeme'])
         next!
         return 'string'
       elsif check("keyword", "true")
-        generator.gen("R[" + generator.reg +"] = 1")
+        @generator.gen("R[" + @generator.reg.to_s + "] = 1")
         next!
         return 'bool'
       elsif check("keyword", "false")
-        generator.gen("R[" + generator.reg +"] = 0")
+        @generator.gen("R[" + @generator.reg.to_s + "] = 0")
         next!
         return 'bool'
       elsif name || number
