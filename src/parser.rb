@@ -26,7 +26,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    #puts @next
+    puts @next
   end
 
   def check(token_class, lexeme)
@@ -676,7 +676,10 @@ class Parser
         current = @next['lexeme']
         type = name
         type ||= number
-        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
+        unless  @symbol_table.find_symbol(current).nil?
+          address = @symbol_table.find_symbol(current)[:address]
+          @generator.gen("MM[" + address.to_s + "] = " + current.to_s)
+        end
         return type
       end
     end

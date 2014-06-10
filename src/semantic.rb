@@ -12,7 +12,8 @@ class SymbolTable
     r = Runtime.new
   	@table = []
     @table << r.load_runtime
-  	@table << {}    
+  	@table << {}
+    @current_address = 16
   end
 
   def enter_scope
@@ -21,7 +22,11 @@ class SymbolTable
 
   def add_symbol(symbol)
     unless @table[-1].has_key? symbol[:name]
-      @table[-1][symbol[:name]] = symbol
+      symbol[:address] = @current_address
+      @table[-1][symbol[:name]] = symbol      
+
+      # increment current address
+      @current_address += 16
     end
   end
 
