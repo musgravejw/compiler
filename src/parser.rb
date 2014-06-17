@@ -11,6 +11,7 @@ dir = File.dirname(__FILE__)
 require "#{dir}/scanner.rb"
 require "#{dir}/semantic.rb"
 require "#{dir}/code_gen.rb"
+require 'pp'
 
 class Parser
   def initialize(filename)
@@ -26,7 +27,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    puts @next
+    #puts @next
   end
 
   def check(token_class, lexeme)
@@ -102,8 +103,8 @@ class Parser
       @symbol_table.enter_scope
       if check("keyword", "begin")
         next!
-        while program_statement
-          next!
+        while program_statement          
+          next!          
         end
         if check("keyword", "end")
           next!
@@ -135,8 +136,8 @@ class Parser
       end
     end
 
-    def program_statement
-      if statement
+    def program_statement      
+      if statement        
         if check("semi_colon", ";")
           return true
         else
@@ -188,8 +189,7 @@ class Parser
     #   | <return_statement>
     #   | <procedure_call>
     #
-    def statement
-      @symbol_table.enter_scope
+    def statement      
       if first("assignment")
         assignment_statement   
       elsif first("if")
@@ -198,14 +198,13 @@ class Parser
         loop_statement
       elsif first("return")
         return_statement
-      elsif first("procedure")
+      elsif first("procedure")        
         procedure_call
       end
-      @symbol_table.exit_scope
     end
 
     def first(alpha)      
-      if alpha == "assignment"
+      if alpha == "assignment"        
         symbol = @symbol_table.find_symbol(@next["lexeme"])
         if symbol
           unless symbol[:type] == "procedure"
@@ -220,10 +219,10 @@ class Parser
         check("keyword", "return")
       elsif alpha == "procedure"
         unless @next["class"] == "keyword"
-          symbol = @symbol_table.find_symbol(@next["lexeme"])
+          symbol = @symbol_table.find_symbol(@next["lexeme"])          
           symbol ||= {}
           if symbol[:type] == "procedure"
-            procedure_call            
+            return true
           end
         end
       end
@@ -288,7 +287,7 @@ class Parser
     #   procedure <identifier> 
     #     ( [<parameter_list>] )
     #
-    def procedure_header
+    def procedure_header      
       if check("keyword", "procedure")
         next!
         @type = "procedure"
@@ -296,6 +295,7 @@ class Parser
           next!
           if check("left_paren", "(")
             next!
+            @symbol_table.enter_scope
             if parameter_list
               #next!
               if check("right_paren", ")")                
@@ -337,7 +337,8 @@ class Parser
           next!
           if check("keyword", "procedure")
             next!
-            return true
+            @symbol_table.exit_scope
+            return true            
           else
             error("keyword procedure")
           end
@@ -415,10 +416,21 @@ class Parser
     #   <destination> := <expression>
     #
     def assignment_statement
+      dest = @next["lexeme"]      
       if destination
         if check("colon_equals", ":=")
           next!
+          value = @next["lexeme"]
+          token_class = @next["class"]
           if expression
+            symbol = @symbol_table.find_symbol(dest)
+            if token_class == "identifier"
+              var_symbol = @symbol_table.find_symbol(value)
+              symbol[:value] = var_symbol[:value]
+            else
+              symbol[:value] = value
+            end
+            @symbol_table.add_symbol(symbol)                          
             return true
           else
             error("expression")
@@ -854,8 +866,7 @@ class Parser
     def procedure_call
       if identifier
         next!
-        if check("left_paren", "(")          
-          next!          
+        if check("left_paren", "(")
           if argument_list
             if check("right_paren", ")")
               next!
@@ -884,6 +895,7 @@ class Parser
     #
     def argument_list
       if expression
+        next!
         if check("comma", ",")
           next!
           argument_list
