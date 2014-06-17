@@ -27,7 +27,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    #puts @next
+    puts @next
   end
 
   def check(token_class, lexeme)
@@ -136,8 +136,10 @@ class Parser
       end
     end
 
-    def program_statement      
-      if statement        
+    def program_statement
+      puts "statement?"
+      if statement
+        puts "valid statement"
         if check("semi_colon", ";")
           return true
         else
@@ -155,11 +157,13 @@ class Parser
       unless check("whitespace", "EOF")
         unless (@next['lexeme'].match(/[a-zA-Z][a-zA-Z0-9_]*/)).nil?
           @name = @next["lexeme"]
-          @symbol_table.add_symbol({
-            name: @name,
-            type: @type
-          })
-          # puts "\n" + @symbol_table.inspect + "\n\n"
+          symbol = @symbol_table.find_symbol(@name)
+          if symbol.nil?
+            @symbol_table.add_symbol({
+              name: @name,
+              type: @type
+            })
+          end
           return true
         end
       else
@@ -218,8 +222,8 @@ class Parser
       elsif alpha == "return"
         check("keyword", "return")
       elsif alpha == "procedure"
-        unless @next["class"] == "keyword"
-          symbol = @symbol_table.find_symbol(@next["lexeme"])          
+        unless @next["class"] == "keyword"          
+          symbol = @symbol_table.find_symbol(@next["lexeme"])               
           symbol ||= {}
           if symbol[:type] == "procedure"
             return true
@@ -866,8 +870,9 @@ class Parser
     def procedure_call
       if identifier
         next!
-        if check("left_paren", "(")
+        if check("left_paren", "(")          
           if argument_list
+            next!
             if check("right_paren", ")")
               next!
               return true
@@ -875,7 +880,7 @@ class Parser
               error("right paren")
             end
           else
-            if check("right_paren", ")")
+            if check("right_paren", ")")              
               next!
               return true
             else
@@ -894,11 +899,11 @@ class Parser
     #   | <expression>
     #
     def argument_list
+      # putInteger(a); is testing ); as an expression, and running off the end of the token stream
       if expression
-        next!
         if check("comma", ",")
           next!
-          argument_list
+          return argument_list
         else
           return true
         end

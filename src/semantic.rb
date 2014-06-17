@@ -38,7 +38,7 @@ class SymbolTable
   end
 
   def find_symbol(name)
-    result = @table[-1][name]   
+    result = @table[-1][name]
     result ||= @table[1][name]
     result ||= @table[0][name]
     return result
