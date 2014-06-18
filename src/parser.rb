@@ -27,7 +27,7 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    puts @next
+    # puts @next
   end
 
   def check(token_class, lexeme)
