@@ -336,6 +336,7 @@ class Parser
         while program_statement
           next!
         end
+        # puts "got here."
         if check("keyword", "end")
           next!
           if check("keyword", "procedure")
@@ -759,34 +760,30 @@ class Parser
     #   end if
     #
     def if_statement
-      if check("keyword", "if")
+      if check("keyword", "if")        
         next!
         if check("left_paren", "(")
           next!
           if expression
-            if check("right_paren", ")")            
+            if check("right_paren", ")")
               next!
-              if check("keyword", "then")                
-                next!                                
-                until check("keyword", "else") || check("keyword", "end") || !statement
+              if check("keyword", "then")
+                next!                
+                until check("keyword", "else") || check("keyword", "end") || !program_statement
                   next!
                 end
                 if check("keyword", "else")
-                  @symbol_table.enter_scope
                   next!
-                  until !statement
+                  until !program_statement
                     next!
-                  end                 
-                end
-                if check("keyword", "end")
-                  next!
-                  if check("keyword", "if")
-                    @symbol_table.exit_scope
-                    next!                    
-                    return true
-                  else
-                    error("keyword end if")
                   end
+                end
+                next!
+                if check("keyword", "if")
+                  next!                    
+                  return true
+                else
+                  error("keyword end if")
                 end
               else
                 error("keyword then")
@@ -862,8 +859,9 @@ class Parser
 
     # <return_statement> ::= return
     #
-    def return_statement 
+    def return_statement      
       if check("keyword", "return")
+        next!
         return true
       else
         error("keyword return")
