@@ -19,8 +19,8 @@ class SymbolTable
 
   def enter_scope
   	@table << {}
-    #pp @table
-    #puts
+    # pp @table
+    # puts
   end
 
   def add_symbol(symbol)
@@ -29,8 +29,6 @@ class SymbolTable
       @table[-1][symbol[:name]] = symbol
 
       # should have value, address      
-      pp @table
-      puts
 
       # increment current address
       #@current_address += 16
