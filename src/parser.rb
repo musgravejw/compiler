@@ -40,8 +40,8 @@ class Parser
     end
   end
 
-  def error(str)
-    puts "=> Parse error [line #{@scanner.line}, col #{@scanner.col}]:  invalid symbol \"#{@next['lexeme']}\" expected '#{str}'."
+  def error(str, type = "Parse")
+    puts "=> #{type} error [line #{@scanner.line}, col #{@scanner.col}]:  invalid symbol \"#{@next['lexeme']}\" expected '#{str}'."
   end
 
   def start
@@ -137,9 +137,8 @@ class Parser
     end
 
     def program_statement
-      puts "statement?"
       if statement
-        puts "valid statement"
+        # puts "valid statement"
         if check("semi_colon", ";")
           return true
         else
@@ -254,7 +253,7 @@ class Parser
       @type = "variable"
       if type_mark
         next!
-        if identifier
+        if identifier          
           next!          
           if check("left_bracket", "[")
             next!
@@ -422,25 +421,29 @@ class Parser
     def assignment_statement
       dest = @next["lexeme"]      
       if destination
-        if check("colon_equals", ":=")
-          next!
-          value = @next["lexeme"]
-          token_class = @next["class"]
-          if expression
-            symbol = @symbol_table.find_symbol(dest)
-            if token_class == "identifier"
-              var_symbol = @symbol_table.find_symbol(value)
-              symbol[:value] = var_symbol[:value]
+        if @symbol_table.find_symbol(dest)
+          if check("colon_equals", ":=")
+            next!
+            value = @next["lexeme"]
+            token_class = @next["class"]
+            if expression
+              symbol = @symbol_table.find_symbol(dest)
+              if token_class == "identifier"
+                var_symbol = @symbol_table.find_symbol(value)
+                symbol[:value] = var_symbol[:value]
+              else
+                symbol[:value] = value
+              end
+              @symbol_table.add_symbol(symbol)                          
+              return true
             else
-              symbol[:value] = value
+              error("expression")
             end
-            @symbol_table.add_symbol(symbol)                          
-            return true
           else
-            error("expression")
+            error("colon equals")
           end
         else
-          error("colon equals")
+          error("destination", "Symbol")
         end
       else
         error("destination")
@@ -769,6 +772,7 @@ class Parser
                   next!
                 end
                 if check("keyword", "else")
+                  @symbol_table.enter_scope
                   next!
                   until !statement
                     next!
@@ -776,8 +780,9 @@ class Parser
                 end
                 if check("keyword", "end")
                   next!
-                  if check("keyword", "if")                    
-                    next!
+                  if check("keyword", "if")
+                    @symbol_table.exit_scope
+                    next!                    
                     return true
                   else
                     error("keyword end if")
@@ -817,6 +822,7 @@ class Parser
               next!
               if expression
                 if check("right_paren", ")")
+                  @symbol_table.enter_scope
                   next!
                   until !statement || check("keyword", "end")
                     next!
@@ -824,6 +830,7 @@ class Parser
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
+                      @symbol_table.exit_scope
                       next!
                       return true
                     else
@@ -869,26 +876,30 @@ class Parser
     #
     def procedure_call
       if identifier
-        next!
-        if check("left_paren", "(")          
-          if argument_list
+        if @symbol_table.find_symbol(@next["lexeme"])
+          next!
+          if check("left_paren", "(")
             next!
-            if check("right_paren", ")")
-              next!
-              return true
+            if argument_list
+              if check("right_paren", ")")
+                next!
+                return true
+              else
+                error("right paren")
+              end
             else
-              error("right paren")
+              if check("right_paren", ")")              
+                next!
+                return true
+              else
+                error("right paren")
+              end
             end
           else
-            if check("right_paren", ")")              
-              next!
-              return true
-            else
-              error("right paren")
-            end
+            error("left paren")
           end
         else
-          error("left paren")
+          error("procedure call", "Symbol")
         end
       end
     end
@@ -899,10 +910,8 @@ class Parser
     #   | <expression>
     #
     def argument_list
-      # putInteger(a); is testing ); as an expression, and running off the end of the token stream
       if expression
         if check("comma", ",")
-          next!
           return argument_list
         else
           return true

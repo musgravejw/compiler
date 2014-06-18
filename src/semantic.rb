@@ -29,8 +29,8 @@ class SymbolTable
       @table[-1][symbol[:name]] = symbol
 
       # should have value, address      
-      #pp @table
-      #puts
+      pp @table
+      puts
 
       # increment current address
       #@current_address += 16
