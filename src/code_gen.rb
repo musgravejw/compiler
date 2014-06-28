@@ -21,15 +21,15 @@ class CodeGen
 
   def gen(str)
   	@program += str
-  	puts str
+  	# puts str
   end
 
-  def op(r1, r2, operator)
-  	# if the types match, unless it's an assignment statement
-    if r1 == r2 or (r1 == "name" || r2 == "name")
-  	  gen("R[1] = R[0] #{operator} R[1];")
-  	else
-  	  puts "Type mismatch"
-  	end
+  def load(reg, address)
+    gen("R[#{reg}] = MM[#{address}]")
+  end
+
+  def op(operator)
+  	gen("R[0] = R[1] #{operator} R[2];")
+    @register -= 2 unless @register == 0
   end
 end
