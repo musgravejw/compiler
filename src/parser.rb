@@ -11,7 +11,6 @@ dir = File.dirname(__FILE__)
 require "#{dir}/scanner.rb"
 require "#{dir}/semantic.rb"
 require "#{dir}/code_gen.rb"
-require 'pp'
 
 class Parser
   def initialize(filename)
@@ -41,7 +40,13 @@ class Parser
   end
 
   def error(str, type = "Parse")
-    puts "=> #{type} error [line #{@scanner.line}, col #{@scanner.col}]:  invalid symbol \"#{@next['lexeme']}\" expected '#{str}'."
+    if type == "Type"
+      puts "=> Type mismatch [line #{@scanner.line}, col #{@scanner.col}]:  expected #{str}"
+    elsif type == "Undefined"
+      puts "=> Variable undefined [line #{@scanner.line}, col #{@scanner.col}]:  #{str}"
+    else      
+      puts "=> #{type} error [line #{@scanner.line}, col #{@scanner.col}]:  invalid symbol \"#{@next['lexeme']}\" expected '#{str}'."
+    end
   end
 
   def start
@@ -192,7 +197,7 @@ class Parser
     #   | <return_statement>
     #   | <procedure_call>
     #
-    def statement      
+    def statement
       if first("assignment")
         assignment_statement   
       elsif first("if")
@@ -201,13 +206,13 @@ class Parser
         loop_statement
       elsif first("return")
         return_statement
-      elsif first("procedure")        
+      elsif first("procedure")
         procedure_call
       end
     end
 
-    def first(alpha)      
-      if alpha == "assignment"        
+    def first(alpha)
+      if alpha == "assignment"
         symbol = @symbol_table.find_symbol(@next["lexeme"])
         if symbol
           unless symbol[:type] == "procedure"
@@ -253,8 +258,8 @@ class Parser
       @type = "variable"
       if type_mark
         next!
-        if identifier          
-          next!          
+        if identifier
+          next!
           if check("left_bracket", "[")
             next!
             if array_size
@@ -298,16 +303,21 @@ class Parser
           next!
           if check("left_paren", "(")
             next!
-            @symbol_table.enter_scope
-            if parameter_list
-              #next!
-              if check("right_paren", ")")                
-                return true
-              else
-                error("right paren")
-              end
+            if check("right_paren", ")")
+              @symbol_table.enter_scope 
+              return true
             else
-              error("parameter list")
+              @symbol_table.enter_scope
+              if parameter_list
+                #next!
+                if check("right_paren", ")")                
+                  return true
+                else
+                  error("right paren")
+                end
+              else
+                error("parameter list")
+              end
             end
           else
             error("left paren")
@@ -336,7 +346,6 @@ class Parser
         while program_statement
           next!
         end
-        # puts "got here."
         if check("keyword", "end")
           next!
           if check("keyword", "procedure")
@@ -361,7 +370,7 @@ class Parser
     #   | bool
     #   | string
     #
-    def type_mark
+    def type_mark      
       if check("keyword", "int") || check("keyword", "integer")
         @type = "integer"
         return true
@@ -420,14 +429,14 @@ class Parser
     #   <destination> := <expression>
     #
     def assignment_statement
-      dest = @next["lexeme"]      
-      if destination
+      dest = @next["lexeme"]
+      if d = destination
         if @symbol_table.find_symbol(dest)
           if check("colon_equals", ":=")
             next!
             value = @next["lexeme"]
             token_class = @next["class"]
-            if expression
+            if e = expression
               symbol = @symbol_table.find_symbol(dest)
               if token_class == "identifier"
                 var_symbol = @symbol_table.find_symbol(value)
@@ -435,8 +444,13 @@ class Parser
               else
                 symbol[:value] = value
               end
-              @symbol_table.add_symbol(symbol)                          
-              return true
+              if d == e
+                @symbol_table.add_symbol(symbol)
+                return true
+              else
+                error("#{d}, got #{e}.", "Type")
+                return true
+              end
             else
               error("expression")
             end
@@ -444,7 +458,7 @@ class Parser
             error("colon equals")
           end
         else
-          error("destination", "Symbol")
+          error(dest, "Undefined")
         end
       else
         error("destination")
@@ -456,14 +470,16 @@ class Parser
     #   <identifier> [ [ <expression> ] ]
     #
     def destination
+      name = @next["lexeme"]
       if identifier
         next!        
         if check("left_bracket", "[")
           next!
-          if expression
+          name = @next["lexeme"]
+          if expression            
             if check("right_bracket", "]")
               next!
-              return true
+              return @symbol_table.find_symbol(name)[:type]              
             else
               error("right bracket")
             end
@@ -471,7 +487,7 @@ class Parser
             error("expression")
           end
         else
-          return true
+          return @symbol_table.find_symbol(name)[:type]
         end
       else
         error("identifier")     
@@ -496,7 +512,7 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
           return t
         end
       elsif check("operator", "|")
@@ -506,7 +522,7 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
           return t
         end
       elsif check("keyword", "not")
@@ -515,7 +531,7 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
           return t
         end
       else
@@ -523,7 +539,7 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
           return t
         end
       end
@@ -536,11 +552,21 @@ class Parser
     #   | <relation>
     #
     def arithmetic_operator
-      type = relation
+      current = @next["lexeme"]
+      unless  @symbol_table.find_symbol(current).nil?
+        address = @symbol_table.find_symbol(current)[:address]
+        value = @symbol_table.find_symbol(current)[:value]
+        if value.nil?
+          @generator.load(@generator.reg, address)
+        else
+          @generator.load(@generator.reg, address)
+        end
+      end
+      type = relation      
       type ||= a_prime
       if @next["class"] == "operator"
         t = a_prime
-        @generator.op(type, t, @operation)
+        @generator.op(@operation)
         return t
       else
         return type
@@ -577,7 +603,7 @@ class Parser
       type ||= r_prime
       if @next["class"] == "operator"
         t = r_prime
-        @generator.op(type, t, @operation)
+        @generator.op(@operation)
         return t
       else
         return type
@@ -620,7 +646,7 @@ class Parser
     #   | <term> / <factor>
     #   | <factor>
     #
-    def term
+    def term      
       type = factor
       if type
         return type
@@ -638,7 +664,8 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
+          return t
         end
       elsif check("operator", "/")
         @operation = "/"
@@ -647,7 +674,8 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          @generator.op(type, t, @operation)
+          @generator.op(@operation)
+          return t
         end
       else
         type = factor
@@ -678,18 +706,50 @@ class Parser
         current = @next['lexeme']
         type = name
         type ||= number
-        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
+        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+          address = @symbol_table.find_symbol(@next['lexeme'])[:address]
+          value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          if value.nil?
+            @generator.gen("MM[" + address.to_s + "] = " + current)
+          else
+            @generator.gen("MM[" + address.to_s + "] = " + value)
+          end
+        end
         return type
       elsif string
-        @generator.gen("R[" + @generator.reg.to_s + "] = " + current)
+        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+          address = @symbol_table.find_symbol(@next['lexeme'])[:address]
+          value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          if value.nil?
+            @generator.gen("MM[" + address.to_s + "] = " + current)
+          else
+            @generator.gen("MM[" + address.to_s + "] = " + value)
+          end
+        end
         next!
         return 'string'
       elsif check("keyword", "true")
-        @generator.gen("R[" + @generator.reg.to_s + "] = 1")
+        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+          address = @symbol_table.find_symbol(@next['lexeme'])[:address]
+          value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          if value.nil?
+            @generator.gen("MM[" + address.to_s + "] = " + current)
+          else
+            @generator.gen("MM[" + address.to_s + "] = " + value)
+          end
+        end
         next!
         return 'bool'
       elsif check("keyword", "false")
-        @generator.gen("R[" + @generator.reg.to_s + "] = 0")
+        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+          address = @symbol_table.find_symbol(@next['lexeme'])[:address]
+          value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          if value.nil?
+            @generator.gen("MM[" + address.to_s + "] = " + current)
+          else
+            @generator.gen("MM[" + address.to_s + "] = " + value)
+          end
+        end
         next!
         return 'bool'      
       else
@@ -698,7 +758,12 @@ class Parser
         type ||= number
         unless  @symbol_table.find_symbol(current).nil?
           address = @symbol_table.find_symbol(current)[:address]
-          @generator.gen("MM[" + address.to_s + "] = " + current.to_s)
+          value = @symbol_table.find_symbol(current)[:value]
+          if value.nil?
+            @generator.gen("MM[" + address.to_s + "] = " + current)
+          else
+            @generator.gen("MM[" + address.to_s + "] = " + value)
+          end
         end
         return type
       end
@@ -709,6 +774,7 @@ class Parser
     #   <identifier> [ [ <expression> ] ]
     #
     def name
+      name = @next["lexeme"]
       if identifier
         next!
         if check("left_bracket", "[")
@@ -716,7 +782,7 @@ class Parser
           if expression
             if check("right_bracket", "]")
               next!
-              return 'name'
+              return @symbol_table.find_symbol(name)[:type]
             else
               error("right bracket")
             end
@@ -724,7 +790,7 @@ class Parser
             error("array size")
           end       
         else
-          return 'name'   
+          return @symbol_table.find_symbol(name)[:type]  
         end
       else
         #error("identifier")
@@ -735,10 +801,11 @@ class Parser
     # <number> ::= [0-9][0-9_]*[.[0-9_]*]
     #
     def number
-      result = !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?
+      number = @next["class"]
+      result = !(@next['lexeme'].match(/[0-9][0-9_]*[.[0-9_]*]?/)).nil?      
       next!
       if result
-        return 'number'
+        return number
       end
     end
 
@@ -814,16 +881,16 @@ class Parser
         next!
         if check("left_paren", "(")
           next!
+          @symbol_table.enter_scope
           if assignment_statement
             if check("semi_colon", ";")
               next!
               if expression
-                if check("right_paren", ")")
-                  @symbol_table.enter_scope
+                if check("right_paren", ")")                  
                   next!
-                  until !statement || check("keyword", "end")
+                  until !program_statement
                     next!
-                  end                  
+                  end
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
@@ -878,21 +945,19 @@ class Parser
           next!
           if check("left_paren", "(")
             next!
-            if argument_list
-              if check("right_paren", ")")
-                next!
-                return true
-              else
-                error("right paren")
-              end
+            if check("right_paren", ")")
+              next!
+              return true
             else
-              if check("right_paren", ")")              
-                next!
-                return true
-              else
-                error("right paren")
+              if argument_list
+                if check("right_paren", ")")
+                  next!
+                  return true
+                else
+                  error("right paren")
+                end
               end
-            end
+            end            
           else
             error("left paren")
           end

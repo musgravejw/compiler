@@ -12,11 +12,12 @@ PROGRAM JAKE IS
 	end procedure;
 
 	procedure for_proc()
+		integer i;
 		begin
-			for(integer i := 0; i < zach)
+			for(i := 0; i < zach)
 				ryan := zach + i;
 			end for;
-		end procedure
+		end procedure;
 
 	begin
 		if_proc();

@@ -14,38 +14,40 @@ class SymbolTable
   	@table = []
     @table << r.load_runtime
   	@table << {}
-    #@current_address = 16
+    @current_address = 16
   end
 
   def enter_scope
   	@table << {}
-    # pp @table
-    # puts
   end
 
   def add_symbol(symbol)
     unless @table[-1].has_key?(symbol[:name]) && !(symbol.has_key?(:value) && !symbol[:value].nil?)
-      #symbol[:address] = @current_address
+      symbol[:address] = @current_address
       @table[-1][symbol[:name]] = symbol
 
-      # should have value, address      
+      # should the symbol table contain a value? 
 
       # pp @table
       # puts
 
       # increment current address
-      #@current_address += 16
+      @current_address += 16
     end
   end
 
   def find_symbol(name)
-    result = @table[-1][name]
-    result ||= @table[1][name]
-    result ||= @table[0][name]
+    result = nil    
+    # iterate over the scopes in reverse order, to follow most-closely nested rule
+    @table.reverse_each do |scope|
+      result = scope[name]
+      break if !result.nil?
+    end
     return result
   end
 
   def exit_scope
+    @current_address -= @table[-1].size * 16
   	@table.pop
   end
 end
