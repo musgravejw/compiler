@@ -26,7 +26,6 @@ class Parser
   def next!
     @next = @scanner.get_next_token 
     abort if @next['lexeme'] == "EOF"
-    # puts @next
   end
 
   def check(token_class, lexeme)
@@ -130,7 +129,6 @@ class Parser
     
     def program_declaration
       if declaration
-        #next!        
         if check("semi_colon", ";")
           return true
         else
@@ -143,11 +141,10 @@ class Parser
 
     def program_statement
       if statement
-        # puts "valid statement"
         if check("semi_colon", ";")
           return true
         else
-          #error("semi colon")
+          error("semi colon")
         end
       else
         return false
@@ -557,8 +554,14 @@ class Parser
       type ||= a_prime
       if @next["class"] == "operator"
         t = a_prime
+        if type == t
+          @generator.op(@operation)
+        else
+          error("#{type} got #{t}", "Type mismatch")
+        end
         return t
       else
+        @generator.op(@operation)
         return type
       end
     end
@@ -693,29 +696,33 @@ class Parser
         current = @next['lexeme']
         type = name
         type ||= number
-        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+        unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          @generator.load(address, "-#{value}")
         end
         return type
       elsif string
-        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+        unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          @generator.load(address, value)
         end
         next!
         return 'string'
       elsif check("keyword", "true")
-        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+        unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          @generator.load(address, value)
         end
         next!
         return 'bool'
       elsif check("keyword", "false")
-        unless  @symbol_table.find_symbol(@next['lexeme']).nil?
+        unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
+          @generator.load(address, value)
         end
         next!
         return 'bool'      
@@ -723,9 +730,10 @@ class Parser
         current = @next['lexeme']
         type = name
         type ||= number
-        unless  @symbol_table.find_symbol(current).nil?
+        unless @symbol_table.find_symbol(current).nil?
           address = @symbol_table.find_symbol(current)[:address]
           value = @symbol_table.find_symbol(current)[:value]
+          @generator.load(address, value)
         end
         return type
       end

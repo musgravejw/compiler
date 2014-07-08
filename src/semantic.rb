@@ -14,7 +14,7 @@ class SymbolTable
   	@table = []
     @table << r.load_runtime
   	@table << {}
-    @current_address = 16
+    @current_address = 32
   end
 
   def enter_scope
@@ -27,12 +27,9 @@ class SymbolTable
       @table[-1][symbol[:name]] = symbol
 
       # should the symbol table contain a value? 
-
-      # pp @table
-      # puts
-
+      
       # increment current address
-      @current_address += 16
+      @current_address += 32
     end
   end
 
@@ -47,7 +44,7 @@ class SymbolTable
   end
 
   def exit_scope
-    @current_address -= @table[-1].size * 16
+    @current_address -= @table[-1].size * 32
   	@table.pop
   end
 end
