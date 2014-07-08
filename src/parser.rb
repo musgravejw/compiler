@@ -512,7 +512,6 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(@operation)
           return t
         end
       elsif check("operator", "|")
@@ -522,7 +521,6 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(@operation)
           return t
         end
       elsif check("keyword", "not")
@@ -531,7 +529,6 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(@operation)
           return t
         end
       else
@@ -539,7 +536,6 @@ class Parser
         if type
           next!
           t = e_prime
-          @generator.op(@operation)
           return t
         end
       end
@@ -556,17 +552,11 @@ class Parser
       unless  @symbol_table.find_symbol(current).nil?
         address = @symbol_table.find_symbol(current)[:address]
         value = @symbol_table.find_symbol(current)[:value]
-        if value.nil?
-          @generator.load(@generator.reg, address)
-        else
-          @generator.load(@generator.reg, address)
-        end
       end
       type = relation      
       type ||= a_prime
       if @next["class"] == "operator"
         t = a_prime
-        @generator.op(@operation)
         return t
       else
         return type
@@ -603,7 +593,6 @@ class Parser
       type ||= r_prime
       if @next["class"] == "operator"
         t = r_prime
-        @generator.op(@operation)
         return t
       else
         return type
@@ -664,7 +653,6 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          @generator.op(@operation)
           return t
         end
       elsif check("operator", "/")
@@ -674,7 +662,6 @@ class Parser
         if type
           next!
           t = t_prime(type)
-          @generator.op(@operation)
           return t
         end
       else
@@ -709,22 +696,12 @@ class Parser
         unless  @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          if value.nil?
-            @generator.gen("MM[" + address.to_s + "] = " + current)
-          else
-            @generator.gen("MM[" + address.to_s + "] = " + value)
-          end
         end
         return type
       elsif string
         unless  @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          if value.nil?
-            @generator.gen("MM[" + address.to_s + "] = " + current)
-          else
-            @generator.gen("MM[" + address.to_s + "] = " + value)
-          end
         end
         next!
         return 'string'
@@ -732,11 +709,6 @@ class Parser
         unless  @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          if value.nil?
-            @generator.gen("MM[" + address.to_s + "] = " + current)
-          else
-            @generator.gen("MM[" + address.to_s + "] = " + value)
-          end
         end
         next!
         return 'bool'
@@ -744,11 +716,6 @@ class Parser
         unless  @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          if value.nil?
-            @generator.gen("MM[" + address.to_s + "] = " + current)
-          else
-            @generator.gen("MM[" + address.to_s + "] = " + value)
-          end
         end
         next!
         return 'bool'      
@@ -759,11 +726,6 @@ class Parser
         unless  @symbol_table.find_symbol(current).nil?
           address = @symbol_table.find_symbol(current)[:address]
           value = @symbol_table.find_symbol(current)[:value]
-          if value.nil?
-            @generator.gen("MM[" + address.to_s + "] = " + current)
-          else
-            @generator.gen("MM[" + address.to_s + "] = " + value)
-          end
         end
         return type
       end
