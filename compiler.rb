@@ -9,19 +9,8 @@ require "#{dir}/src/parser.rb"
 
 class Compiler
   def initialize(filename)    
-    @line = 0
-    @error = ""
-    @scanner = nil
     @parser = Parser.new(filename)
     @parser.start()
-  end
-
-  def reportError(message)
-    puts message
-  end
-
-  def reportWarning(message)
-    puts message
   end
 end
 

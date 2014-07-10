@@ -6,7 +6,6 @@
 
 dir = File.dirname(__FILE__)
 require "#{dir}/runtime.rb"
-require 'pp'
 
 class SymbolTable
   def initialize
@@ -26,15 +25,21 @@ class SymbolTable
       symbol[:address] = @current_address
       @table[-1][symbol[:name]] = symbol
 
-      # should the symbol table contain a value? 
-      
       # increment current address
       @current_address += 32
     end
   end
 
+  def update_symbol(symbol)
+    unless @table[-1].has_key?(symbol[:name]) && !(symbol.has_key?(:value) && !symbol[:value].nil?)
+      symbol[:address] = @current_address
+      @table[-1][symbol[:name]] = symbol
+    end
+  end
+
   def find_symbol(name)
     result = nil    
+    
     # iterate over the scopes in reverse order, to follow most-closely nested rule
     @table.reverse_each do |scope|
       result = scope[name]

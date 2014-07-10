@@ -40,7 +40,7 @@ class Parser
 
   def error(str, type = "Parse")
     if type == "Type"
-      puts "=> Type mismatch [line #{@scanner.line}, col #{@scanner.col}]:  expected #{str}"
+      puts "=> Warning: Type mismatch [line #{@scanner.line}, col #{@scanner.col}]:  expected #{str}"
     elsif type == "Undefined"
       puts "=> Variable undefined [line #{@scanner.line}, col #{@scanner.col}]:  #{str}"
     else      
@@ -62,6 +62,7 @@ class Parser
       if program_header
         next!        
         if program_body
+          @generator.output()
           puts "Parse completed successfully."
         else
           error("program body")
@@ -252,8 +253,7 @@ class Parser
     #   [ [ <array_size> ] ]
     #
     def variable_declaration
-      @type = "variable"
-      if type_mark
+      if @type = type_mark
         next!
         if identifier
           next!
@@ -370,16 +370,16 @@ class Parser
     def type_mark      
       if check("keyword", "int") || check("keyword", "integer")
         @type = "integer"
-        return true
+        return @type
       elsif check("keyword", "float") 
         @type = "float"
-        return true
+        return @type
       elsif check("keyword", "bool") 
         @type = "bool"
-        return true
+        return @type
       elsif check("keyword", "string")
         @type = "string"
-        return true
+        return @type
       end
     end
 
@@ -437,12 +437,15 @@ class Parser
               symbol = @symbol_table.find_symbol(dest)
               if token_class == "identifier"
                 var_symbol = @symbol_table.find_symbol(value)
-                symbol[:value] = var_symbol[:value]
+                symbol[:value] = var_symbol[:value]                
               else
                 symbol[:value] = value
               end
               if d == e
                 @symbol_table.add_symbol(symbol)
+                @generator.store(symbol[:value])
+                address = @symbol_table.find_symbol(symbol[:name])[:address]
+                @generator.assignment(address)
                 return true
               else
                 error("#{d}, got #{e}.", "Type")
@@ -473,10 +476,13 @@ class Parser
         if check("left_bracket", "[")
           next!
           name = @next["lexeme"]
-          if expression            
+          if e = expression            
             if check("right_bracket", "]")
               next!
-              return @symbol_table.find_symbol(name)[:type]              
+              symbol = @symbol_table.find_symbol(name)
+              symbol[:type] = e
+              @symbol_table.update_symbol(symbol)
+              return e
             else
               error("right bracket")
             end
@@ -575,9 +581,11 @@ class Parser
         @operation = "-"
         next!
         relation
-      elsif !@next["class"] == "keyword" && relation
-        next!
-        return true
+      elsif !@next["class"] == "keyword"
+        if t = relation
+          next!
+          return t
+        end
       end
     end
 

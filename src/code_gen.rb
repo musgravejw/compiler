@@ -17,8 +17,7 @@ class CodeGen
   end
 
   def gen(str)
-    @program += str
-    puts str
+    @program += str + "\n"
   end
 
   def load(address, value)
@@ -28,17 +27,39 @@ class CodeGen
     end
   end
 
-  def op(operator)
-    self.gen("R[" + (@stack.size - 1).to_s + "] = R[" + @stack.size.to_s + "] #{operator} R[" + (@stack.size - 1).to_s + "];")
+  def store(value)
+    unless value.nil?
+      @stack.push value
+    end
+  end
 
-    if operator == "+"
-      @stack.push @stack.pop + @stack.pop
-    elsif operator == "-"
-      @stack.push @stack.pop - @stack.pop
-    elsif operator == "*"
-      @stack.push @stack.pop * @stack.pop
-    elsif operator == "/"
-      @stack.push @stack.pop / @stack.pop
-    end    
+  def op(operator)
+    unless operator.size <= 0
+      self.gen("R[" + (@stack.size - 1).to_s + "] = R[" + (@stack.size - 2).to_s + "] #{operator} R[" + (@stack.size - 1).to_s + "];")
+
+      if operator == "+"
+        @stack.push @stack.pop + @stack.pop
+      elsif operator == "-"
+        @stack.push @stack.pop - @stack.pop
+      elsif operator == "*"
+        @stack.push @stack.pop * @stack.pop
+      elsif operator == "/"
+        @stack.push @stack.pop / @stack.pop
+      end    
+    end
+
+    def assignment(address)
+      self.gen("MM[#{address}] = R[" + (self.reg - 1).to_s + "];")
+    end
+
+    def output
+      if !Dir.open("target")
+        Dir.mkdir "target"
+      end
+
+      File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
+        file.write @program
+      end
+    end
   end
 end

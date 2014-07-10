@@ -11,6 +11,6 @@ task :test do
   puts
   ruby "./compiler.rb ./tests/correct/test_program_minimal.src"
   puts
-  # ruby "./compiler.rb ./tests/correct/test_program_with_errors.src"
-  # puts  
+  ruby "./compiler.rb ./tests/correct/test_program_with_errors.src"
+  puts  
 end
