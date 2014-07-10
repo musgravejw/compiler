@@ -53,13 +53,13 @@ class CodeGen
     end
 
     def output
-      if !Dir.open("target")
-        Dir.mkdir "target"
-      end
+      #if !Dir.open("target")
+        #Dir.mkdir "target"
+      #end
 
-      File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
-        file.write @program
-      end
+      #File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
+        #file.write @program
+      #end
     end
   end
 end
