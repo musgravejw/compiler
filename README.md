@@ -10,45 +10,45 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
     <program_header> <program_body>
 
 <program_header> ::=
-    'program' <identifier> 'is'
+    program <identifier> is
 
 <program_body> ::=
-        ( <declaration> ';' )*
-    'begin'
-        ( <statement> ';' )*
-    'end' 'program'
+        ( <declaration> ; )*
+    begin
+        ( <statement> ; )*
+    end program
 
 <declaration> ::=
-    [ 'global' ] <procedure_declaration>
-    [ 'global' ] <variable_declaration>
+    [ global ] <procedure_declaration>
+    [ global ] <variable_declaration>
 
 <variable_declaration> ::=
-    <type_mark> <identifier> [ '[' <array_size> ']' ]
+    <type_mark> <identifier> [ [ <array_size> ] ]
 
 <type_mark> ::=
-    'integer' |
-    'float' |
-    'bool' |
-    'string'
+    integer |
+    float |
+    bool |
+    string
 
 <procedure_declaration> ::=
     <procedure_header> <procedure_body>
 
 <procedure_header> ::=
-    'procedure' <identifier> '(' [ <parameter_list> ] ')'
+    procedure <identifier> ( [ <parameter_list> ] )
 
 <procedure_body> ::=
-        ( <declaration> ';' )*
-    'begin'
-        ( <statement ';' )*
-    'end' 'procedure'
+        ( <declaration> ; )*
+    begin
+        ( <statement ; )*
+    end procedure
 
 <parameter_list> ::=
-    <parameter> ',' <parameter_list> |
+    <parameter> , <parameter_list> |
     <parameter>
 
 <parameter> ::=
-    <variable_declaration> ( 'in' | 'out' )
+    <variable_declaration> ( in | out )
 
 <statement> ::=
     <assignment_statement> |
@@ -58,62 +58,62 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
     <procedure_call>
 
 <assignment_statement> ::=
-    <destination> ':=' <expression>
+    <destination> := <expression>
 
 <if_statement> ::=
-    'if' '(' <expression> ')' 'then' ( <statement> ';' )+
-    [ 'else' ( <statement> ';' )+ ]
-    'end' 'if'
+    if ( <expression> ) then ( <statement> ; )+
+    [ else ( <statement> ; )+ ]
+    end if
 
 <loop_statement> ::=
-    'for' '(' <assignment_statement> ';' <expression> ')'
-        ( <statement> ';' )*
-    'end' 'for'
+    for ( <assignment_statement> ; <expression> )
+        ( <statement> ; )*
+    end for
 
 <procedure_call> ::=
-    <identifier> '(' [ <argument_list> ] ')'
+    <identifier> ( [ <argument_list> ] )
 
 <argument_list> ::=
-    <expression> ',' <argument_list> |
+    <expression> , <argument_list> |
     <expression>
 
 <destination> ::=
-    <identifier> [ '[' <expression> ']' ]
+    <identifier> [ [ <expression> ] ]
 
 <expression> ::=
-    <expression> '&' <arith_op> |
-    <expression> '|' <arith_op> |
-    [ 'not' ] <arith_op>
+    <expression> & <arith_op> |
+    <expression> | <arith_op> |
+    [ not ] <arith_op>
 
 <arith_op> ::=
-    <arith_op> '+' <relation> |
-    <arith_op> '-' <relation> |
+    <arith_op> + <relation> |
+    <arith_op> - <relation> |
     <relation>
 
 <relation> ::=
-    <relation> '<' <term> |
-    <relation> '>' <term> |
-    <relation> '>=' <term> |
-    <relation> '<=' <term> |
-    <relation> '==' <term> |
-    <relation> '!=' <term> |
+    <relation> < <term> |
+    <relation> > <term> |
+    <relation> >= <term> |
+    <relation> <= <term> |
+    <relation> == <term> |
+    <relation> != <term> |
     <term>
 
 <term> ::=
-    <term> '*' <factor> |
-    <term> '/' <factor> |
+    <term> * <factor> |
+    <term> / <factor> |
     <factor>
 
 <factor> ::=
-    '(' <expression> ')' |
-    [ '-' ] <name> |
-    [ '-' ] <number> |
+    ( <expression> ) |
+    [ - ] <name> |
+    [ - ] <number> |
     <string> |
-    'true' |
-    'false' |
+    true |
+    false |
 
 <name> ::=
-    <identifier> [ '[' <expression> ']' ]
+    <identifier> [ [ <expression> ] ]
 
 <identifier> ::=
     [a-zA-Z][a-zA-Z0-9_]*
@@ -122,7 +122,8 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
     [0-9][0-9_]*[.[0-9_]*]?
 
 <string> ::=
-    "[a-zA-Z0-9 _,;:.']*"
+    "[a-zA-Z0-9 _,;:.]*"
+```
 ```
 
 ##Author
