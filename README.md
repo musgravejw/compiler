@@ -4,10 +4,6 @@ This is a project written in Ruby to demonstrate compiler theory concepts.
 The compiler is a single pass LL(1) recursive descent compiler built from a custom grammar.
 
 
-##Author
-Written by [John Musgrave](http://johnmusgrave.com).
-
-
 ##Language
 ```
 <program> ::=
@@ -128,3 +124,6 @@ Written by [John Musgrave](http://johnmusgrave.com).
 <string> ::=
     "[a-zA-Z0-9 _,;:.']*"
 ```
+
+##Author
+Written by [John Musgrave](http://johnmusgrave.com).
