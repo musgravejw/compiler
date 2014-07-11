@@ -296,7 +296,9 @@ class Parser
       if check("keyword", "procedure")
         next!
         @type = "procedure"
+        p = @next["lexeme"]
         if identifier
+          @generator.gen("\n#{p}:  \n")
           next!
           if check("left_paren", "(")
             next!
@@ -919,7 +921,7 @@ class Parser
     #
     def procedure_call
       if identifier
-        if @symbol_table.find_symbol(@next["lexeme"])
+        if p = @symbol_table.find_symbol(@next["lexeme"])
           next!
           if check("left_paren", "(")
             next!
@@ -930,6 +932,7 @@ class Parser
               if argument_list
                 if check("right_paren", ")")
                   next!
+                  @generator.gen("goto " + p[:name] + ";")
                   return true
                 else
                   error("right paren")

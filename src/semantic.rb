@@ -11,7 +11,7 @@ class SymbolTable
   def initialize
     r = Runtime.new
   	@table = []
-    @table << r.load_runtime
+    @table << r.load_runtime_symbol_table
   	@table << {}
     @current_address = 32
   end
