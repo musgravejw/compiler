@@ -124,7 +124,6 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
 <string> ::=
     "[a-zA-Z0-9 _,;:.]*"
 ```
-```
 
 ##Author
 Written by [John Musgrave](http://johnmusgrave.com).
