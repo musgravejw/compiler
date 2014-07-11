@@ -15,5 +15,127 @@ Written by [John Musgrave](http://johnmusgrave.com).
 <tr><td>Parser</td><td>Completed</td></tr>
 <tr><td>Semantic Analysis</td><td>Completed</td></tr>
 <tr><td>Code Generation</td><td>Development</td></tr>
-<tr><td>Runtime</td><td>Incomplete</td></tr>
+<tr><td>Runtime</td><td>Development</td></tr>
 </table>
+
+
+##Language
+```
+<program> ::=
+    <program_header> <program_body>
+
+<program_header> ::=
+    'program' <identifier> 'is'
+
+<program_body> ::=
+        ( <declaration> ';' )*
+    'begin'
+        ( <statement> ';' )*
+    'end' 'program'
+
+<declaration> ::=
+    [ 'global' ] <procedure_declaration>
+    [ 'global' ] <variable_declaration>
+
+<variable_declaration> ::=
+    <type_mark> <identifier> [ '[' <array_size> ']' ]
+
+<type_mark> ::=
+    'integer' |
+    'float' |
+    'bool' |
+    'string'
+
+<procedure_declaration> ::=
+    <procedure_header> <procedure_body>
+
+<procedure_header> ::=
+    'procedure' <identifier> '(' [ <parameter_list> ] ')'
+
+<procedure_body> ::=
+        ( <declaration> ';' )*
+    'begin'
+        ( <statement ';' )*
+    'end' 'procedure'
+
+<parameter_list> ::=
+    <parameter> ',' <parameter_list> |
+    <parameter>
+
+<parameter> ::=
+    <variable_declaration> ( 'in' | 'out' )
+
+<statement> ::=
+    <assignment_statement> |
+    <if_statement> |
+    <loop_statement> |
+    <return_statement> |
+    <procedure_call>
+
+<assignment_statement> ::=
+    <destination> ':=' <expression>
+
+<if_statement> ::=
+    'if' '(' <expression> ')' 'then' ( <statement> ';' )+
+    [ 'else' ( <statement> ';' )+ ]
+    'end' 'if'
+
+<loop_statement> ::=
+    'for' '(' <assignment_statement> ';' <expression> ')'
+        ( <statement> ';' )*
+    'end' 'for'
+
+<procedure_call> ::=
+    <identifier> '(' [ <argument_list> ] ')'
+
+<argument_list> ::=
+    <expression> ',' <argument_list> |
+    <expression>
+
+<destination> ::=
+    <identifier> [ '[' <expression> ']' ]
+
+<expression> ::=
+    <expression> '&' <arith_op> |
+    <expression> '|' <arith_op> |
+    [ 'not' ] <arith_op>
+
+<arith_op> ::=
+    <arith_op> '+' <relation> |
+    <arith_op> '-' <relation> |
+    <relation>
+
+<relation> ::=
+    <relation> '<' <term> |
+    <relation> '>' <term> |
+    <relation> '>=' <term> |
+    <relation> '<=' <term> |
+    <relation> '==' <term> |
+    <relation> '!=' <term> |
+    <term>
+
+<term> ::=
+    <term> '*' <factor> |
+    <term> '/' <factor> |
+    <factor>
+
+<factor> ::=
+    '(' <expression> ')' |
+    [ '-' ] <name> |
+    [ '-' ] <number> |
+    <string> |
+    'true' |
+    'false' |
+
+<name> ::=
+    <identifier> [ '[' <expression> ']' ]
+
+<identifier> ::=
+    [a-zA-Z][a-zA-Z0-9_]*
+
+<number> ::=
+    [0-9][0-9_]*[.[0-9_]*]?
+
+<string> ::=
+    "[a-zA-Z0-9 _,;:.']*"
+```
