@@ -109,7 +109,7 @@ class Parser
       if check("keyword", "begin")
         next!
         while program_statement          
-          next!          
+          next!
         end
         if check("keyword", "end")
           next!
@@ -298,7 +298,7 @@ class Parser
         @type = "procedure"
         p = @next["lexeme"]
         if identifier
-          @generator.gen("\n#{p}:  \n")
+          @generator.gen("\n#{p}:")
           next!
           if check("left_paren", "(")
             next!
@@ -308,7 +308,6 @@ class Parser
             else
               @symbol_table.enter_scope
               if parameter_list
-                #next!
                 if check("right_paren", ")")                
                   return true
                 else
@@ -337,14 +336,19 @@ class Parser
     #   end procedure
     # 
     def procedure_body
+      @generator.indent()
       while program_declaration
         next!
-      end      
+      end
+      @generator.outdent()
       if check("keyword", "begin")
         next!
+        @generator.indent()
         while program_statement
           next!
         end
+        @generator.outdent()
+        @generator.gen("")
         if check("keyword", "end")
           next!
           if check("keyword", "procedure")
@@ -862,6 +866,8 @@ class Parser
         if check("left_paren", "(")
           next!
           @symbol_table.enter_scope
+          @generator.gen(@generator.margin + "label here:")
+          @generator.indent()
           if assignment_statement
             if check("semi_colon", ";")
               next!
@@ -874,6 +880,8 @@ class Parser
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
+                      # jcnd here
+                      @generator.outdent()
                       @symbol_table.exit_scope
                       next!
                       return true
@@ -932,7 +940,7 @@ class Parser
               if argument_list
                 if check("right_paren", ")")
                   next!
-                  @generator.gen("goto " + p[:name] + ";")
+                  @generator.gen(@generator.margin + "goto " + p[:name] + ";")
                   return true
                 else
                   error("right paren")

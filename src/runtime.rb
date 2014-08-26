@@ -28,8 +28,7 @@ class Runtime
   end
 
   def load_runtime_code_generation
-    '
-getBool:
+    'getBool:
   scanf("%s", &R[0]);
 
 getInteger:

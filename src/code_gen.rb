@@ -14,6 +14,7 @@ class CodeGen
     r = Runtime.new
     @stack = [0]
     @program = r.load_runtime_code_generation
+    @margin = ""
   end
 
   def reg
@@ -24,27 +25,39 @@ class CodeGen
     @program += str + "\n"
   end
 
+  def indent
+    @margin << "\t"
+  end
+
+  def outdent
+    @margin = @margin[0...-2]
+  end
+
+  def margin
+    @margin
+  end
+
   def load(address, value)
     unless value.nil?
-      self.gen("R[" + reg.to_s + "] = MM[#{address}];")
+      self.gen(@margin + "R[" + reg.to_s + "] = MM[#{address}];")
       @stack << value
     end
   end
 
   def store(value)
     unless value.nil?
-      self.gen("R[" + reg.to_s + "] = " + value.to_s + ";")
+      self.gen(@margin + "R[" + reg.to_s + "] = " + value.to_s + ";")
       @stack << value
     end
   end
 
   def op(operator)
     unless operator.size <= 0
-      self.gen("R[" + (reg - 1).to_s + "] = R[" + (reg - 2).to_s + "] #{operator} R[" + (reg - 1).to_s + "];")
+      self.gen(@margin + "R[" + (reg - 1).to_s + "] = R[" + (reg - 2).to_s + "] #{operator} R[" + (reg - 1).to_s + "];")
     end
 
     def assignment(address)
-      self.gen("MM[#{address}] = R[" + (reg - 1).to_s + "];")
+      self.gen(@margin + "MM[#{address}] = R[" + (reg - 1).to_s + "];")
     end
 
     def output
