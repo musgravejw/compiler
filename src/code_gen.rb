@@ -61,7 +61,7 @@ class CodeGen
     end
 
     def output
-      if !Dir.open("target")
+      if !Dir.exists?("target")
         Dir.mkdir "target"
       end
 
