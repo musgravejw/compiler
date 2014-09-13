@@ -37,27 +37,21 @@ class CodeGen
     @margin
   end
 
-  def load(address, value)
-    unless value.nil?
-      self.gen(@margin + "R[" + reg.to_s + "] = MM[#{address}];")
-      @stack << value
-    end
+  def load(address)
+    self.gen(@margin + "R[" + reg.to_s + "] = MM[#{address}];")
   end
 
-  def store(value)
-    unless value.nil?
-      self.gen(@margin + "R[" + reg.to_s + "] = " + value.to_s + ";")
-      @stack << value
-    end
+  def store(address)
+    self.gen(@margin + "MM[#{address}] = " + "R[" + reg.to_s + "];")
+  end
+
+  def mem(address, value)
+    self.gen(@margin + "MM[#{address}] = #{value}")
   end
 
   def op(operator)
     unless operator.size <= 0
       self.gen(@margin + "R[" + (reg - 1).to_s + "] = R[" + (reg - 2).to_s + "] #{operator} R[" + (reg - 1).to_s + "];")
-    end
-
-    def assignment(address)
-      self.gen(@margin + "MM[#{address}] = R[" + (reg - 1).to_s + "];")
     end
 
     def output
