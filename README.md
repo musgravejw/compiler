@@ -8,6 +8,20 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
 
 `rake clean` to clear 'target' dir.
 
+```
+| compiler
+    | src
+        | scanner.rb
+        | parser.rb
+        | semantic.rb
+        | code_gen.rb
+        | runtim.rb                     
+    | target
+        | generated source files
+    | tests
+        | test programs
+```
+
 ##Language
 ```
 <program> ::=
