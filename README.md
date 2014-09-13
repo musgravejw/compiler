@@ -3,6 +3,9 @@ Compiler ![Build Status](https://travis-ci.org/musgravejw/compiler.svg?branch=ma
 This is a project written in Ruby to demonstrate compiler theory concepts.
 The compiler is a single pass LL(1) recursive descent compiler built from a custom grammar.
 
+##Usage
+`rake` will build everything in the 'tests' dir.
+`rake clean` to clear 'target' dir.
 
 ##Language
 ```
