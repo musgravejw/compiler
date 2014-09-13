@@ -5,6 +5,7 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
 
 ##Usage
 `rake` will build everything in the 'tests' dir.
+
 `rake clean` to clear 'target' dir.
 
 ##Language
