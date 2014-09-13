@@ -14,17 +14,7 @@
 # 	  integer putString(string)
 
 class Runtime
-  def load_runtime
-    #{
-      #getBool: {name: "getBool", type: "bool"},
-      #getInteger: {name: "getInteger", type: "integer"},
-      #getFloat: {name: "getFloat", type: "string"},
-      #getString: {name: "getString", type: "string"},
-      #putBool: {name: "putBool", type: "integer"},
-      #putInteger: {name: "putInteger", type: "integer"},
-      #putFloat: {name: "putFloat", type: "integer"},
-      #putString: {name: "putString", type: "integer"},
-    #}
+  def load_runtime_symbol_table
     {
       "getbool" => {name: "getbool", type: "procedure"},
       "getinteger" =>{name: "getinteger", type: "procedure"},
@@ -35,5 +25,32 @@ class Runtime
       "putfloat" => {name: "putfloat", type: "procedure"},
       "putstring" => {name: "putstring", type: "procedure"},
     }
+  end
+
+  def load_runtime_code_generation
+    'getBool:
+  scanf("%s", &R[0]);
+
+getInteger:
+  scanf("%s", &R[0]);
+
+getFloat:
+  scanf("%s", &R[0]);
+
+getString:
+  scanf("%s", &R[0]);
+
+putBool:
+  printf("%s", R[0]);
+
+putInteger:
+  printf("%s", R[0]);
+
+putFloat:
+  printf("%s", R[0]);
+
+putString:
+  printf("%s", R[0]);
+'
   end
 end

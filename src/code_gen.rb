@@ -6,10 +6,15 @@
 #   Class for code generation
 #   Implementation of a n-register stack machine
 
+dir = File.dirname(__FILE__)
+require "#{dir}/runtime.rb"
+
 class CodeGen
   def initialize
-    @stack = []
-    @program = ""
+    r = Runtime.new
+    @stack = [0]
+    @program = r.load_runtime_code_generation
+    @margin = ""
   end
 
   def reg
@@ -20,46 +25,43 @@ class CodeGen
     @program += str + "\n"
   end
 
-  def load(address, value)
-    unless value.nil?
-      self.gen("R[" + self.reg.to_s + "] = MM[#{address}];")
-      @stack.push value
-    end
+  def indent
+    @margin << "\t"
   end
 
-  def store(value)
-    unless value.nil?
-      @stack.push value
-    end
+  def outdent
+    @margin = @margin[0...-2]
+  end
+
+  def margin
+    @margin
+  end
+
+  def load(address)
+    self.gen(@margin + "R[" + reg.to_s + "] = MM[#{address}];")
+  end
+
+  def store(address)
+    self.gen(@margin + "MM[#{address}] = " + "R[" + reg.to_s + "];")
+  end
+
+  def mem(address, value)
+    self.gen(@margin + "MM[#{address}] = #{value}")
   end
 
   def op(operator)
     unless operator.size <= 0
-      self.gen("R[" + (@stack.size - 1).to_s + "] = R[" + (@stack.size - 2).to_s + "] #{operator} R[" + (@stack.size - 1).to_s + "];")
-
-      if operator == "+"
-        @stack.push @stack.pop + @stack.pop
-      elsif operator == "-"
-        @stack.push @stack.pop - @stack.pop
-      elsif operator == "*"
-        @stack.push @stack.pop * @stack.pop
-      elsif operator == "/"
-        @stack.push @stack.pop / @stack.pop
-      end    
-    end
-
-    def assignment(address)
-      self.gen("MM[#{address}] = R[" + (self.reg - 1).to_s + "];")
+      self.gen(@margin + "R[" + (reg - 1).to_s + "] = R[" + (reg - 2).to_s + "] #{operator} R[" + (reg - 1).to_s + "];")
     end
 
     def output
-      #if !Dir.open("target")
-        #Dir.mkdir "target"
-      #end
+      if !Dir.exists?("target")
+        Dir.mkdir "target"
+      end
 
-      #File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
-        #file.write @program
-      #end
+      File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
+        file.write @program
+      end
     end
   end
 end

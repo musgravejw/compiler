@@ -63,7 +63,7 @@ class Parser
         next!        
         if program_body
           @generator.output()
-          puts "Parse completed successfully."
+          puts "=> Parse completed successfully."
         else
           error("program body")
         end
@@ -109,7 +109,7 @@ class Parser
       if check("keyword", "begin")
         next!
         while program_statement          
-          next!          
+          next!
         end
         if check("keyword", "end")
           next!
@@ -197,7 +197,7 @@ class Parser
     #
     def statement
       if first("assignment")
-        assignment_statement   
+        assignment_statement
       elsif first("if")
         if_statement
       elsif first("loop")
@@ -296,7 +296,9 @@ class Parser
       if check("keyword", "procedure")
         next!
         @type = "procedure"
+        p = @next["lexeme"]
         if identifier
+          @generator.gen("\n#{p}:")
           next!
           if check("left_paren", "(")
             next!
@@ -306,7 +308,6 @@ class Parser
             else
               @symbol_table.enter_scope
               if parameter_list
-                #next!
                 if check("right_paren", ")")                
                   return true
                 else
@@ -335,14 +336,19 @@ class Parser
     #   end procedure
     # 
     def procedure_body
+      @generator.indent()
       while program_declaration
         next!
-      end      
+      end
+      @generator.outdent()
       if check("keyword", "begin")
         next!
+        @generator.indent()
         while program_statement
           next!
         end
+        @generator.outdent()
+        @generator.gen("")
         if check("keyword", "end")
           next!
           if check("keyword", "procedure")
@@ -435,17 +441,21 @@ class Parser
             token_class = @next["class"]
             if e = expression
               symbol = @symbol_table.find_symbol(dest)
+
               if token_class == "identifier"
                 var_symbol = @symbol_table.find_symbol(value)
-                symbol[:value] = var_symbol[:value]                
+                symbol[:value] = var_symbol[:value]
+                @generator.load(var_symbol[:address])
               else
                 symbol[:value] = value
+                @generator.mem(symbol[:address], symbol[:value])
+                @generator.load(symbol[:address])
               end
+
               if d == e
                 @symbol_table.add_symbol(symbol)
-                @generator.store(symbol[:value])
                 address = @symbol_table.find_symbol(symbol[:name])[:address]
-                @generator.assignment(address)
+                @generator.store(address)
                 return true
               else
                 error("#{d}, got #{e}.", "Type")
@@ -707,14 +717,12 @@ class Parser
         unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          @generator.load(address, "-#{value}")
         end
         return type
       elsif string
         unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          @generator.load(address, value)
         end
         next!
         return 'string'
@@ -722,7 +730,6 @@ class Parser
         unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          @generator.load(address, value)
         end
         next!
         return 'bool'
@@ -730,7 +737,6 @@ class Parser
         unless @symbol_table.find_symbol(@next['lexeme']).nil?
           address = @symbol_table.find_symbol(@next['lexeme'])[:address]
           value = @symbol_table.find_symbol(@next['lexeme'])[:value]
-          @generator.load(address, value)
         end
         next!
         return 'bool'      
@@ -741,7 +747,6 @@ class Parser
         unless @symbol_table.find_symbol(current).nil?
           address = @symbol_table.find_symbol(current)[:address]
           value = @symbol_table.find_symbol(current)[:value]
-          @generator.load(address, value)
         end
         return type
       end
@@ -860,6 +865,8 @@ class Parser
         if check("left_paren", "(")
           next!
           @symbol_table.enter_scope
+          @generator.gen(@generator.margin + "label here:")
+          @generator.indent()
           if assignment_statement
             if check("semi_colon", ";")
               next!
@@ -872,6 +879,8 @@ class Parser
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
+                      # jcnd here
+                      @generator.outdent()
                       @symbol_table.exit_scope
                       next!
                       return true
@@ -919,7 +928,7 @@ class Parser
     #
     def procedure_call
       if identifier
-        if @symbol_table.find_symbol(@next["lexeme"])
+        if p = @symbol_table.find_symbol(@next["lexeme"])
           next!
           if check("left_paren", "(")
             next!
@@ -930,6 +939,7 @@ class Parser
               if argument_list
                 if check("right_paren", ")")
                   next!
+                  @generator.gen(@generator.margin + "goto " + p[:name] + ";")
                   return true
                 else
                   error("right paren")
