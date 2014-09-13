@@ -41,6 +41,10 @@ class CodeGen
     self.gen(@margin + "R[" + reg.to_s + "] = MM[#{address}];")
   end
 
+  def load2(value)
+    self.gen(@margin + "R[2] = #{value}")
+  end
+
   def store(address)
     self.gen(@margin + "MM[#{address}] = " + "R[" + reg.to_s + "];")
   end
@@ -51,17 +55,17 @@ class CodeGen
 
   def op(operator)
     unless operator.size <= 0
-      self.gen(@margin + "R[" + (reg - 1).to_s + "] = R[" + (reg - 2).to_s + "] #{operator} R[" + (reg - 1).to_s + "];")
+      self.gen(@margin + "R[" + reg.to_s + "] = R[" + reg.to_s + "] #{operator} R[" + (reg + 1).to_s + "];")
+    end
+  end
+
+  def output
+    if !Dir.exists?("target")
+      Dir.mkdir "target"
     end
 
-    def output
-      if !Dir.exists?("target")
-        Dir.mkdir "target"
-      end
-
-      File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
-        file.write @program
-      end
+    File.open("target/target_" + Time.now.strftime("%Y%m%d%H%M%S%L"), 'w') do |file| 
+      file.write @program
     end
   end
 end

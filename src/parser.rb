@@ -62,7 +62,7 @@ class Parser
       if program_header
         next!        
         if program_body
-          @generator.output()
+          @generator.output
           puts "=> Parse completed successfully."
         else
           error("program body")
@@ -336,18 +336,18 @@ class Parser
     #   end procedure
     # 
     def procedure_body
-      @generator.indent()
+      @generator.indent
       while program_declaration
         next!
       end
-      @generator.outdent()
+      @generator.outdent
       if check("keyword", "begin")
         next!
-        @generator.indent()
+        @generator.indent
         while program_statement
           next!
         end
-        @generator.outdent()
+        @generator.outdent
         @generator.gen("")
         if check("keyword", "end")
           next!
@@ -561,13 +561,7 @@ class Parser
     #   | <relation>
     #
     def arithmetic_operator
-      current = @next["lexeme"]
-      unless  @symbol_table.find_symbol(current).nil?
-        address = @symbol_table.find_symbol(current)[:address]
-        value = @symbol_table.find_symbol(current)[:value]
-      end
-      type = relation      
-      type ||= a_prime
+      type = relation
       if @next["class"] == "operator"
         t = a_prime
         if type == t
@@ -577,7 +571,6 @@ class Parser
         end
         return t
       else
-        @generator.op(@operation)
         return type
       end
     end
@@ -610,6 +603,12 @@ class Parser
     #   | <term>
     #
     def relation
+      current = @next["lexeme"]
+      unless  @symbol_table.find_symbol(current).nil?
+        address = @symbol_table.find_symbol(current)[:address]
+        value = @symbol_table.find_symbol(current)[:value]
+        @generator.load(address)
+      end
       type = term
       type ||= r_prime
       if @next["class"] == "operator"
@@ -621,33 +620,74 @@ class Parser
     end
 
     def r_prime
+      type = ""
       if check("operator", "<")
         @operation = "<"
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       elsif check("operator", "<=")
         @operation = "<="
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       elsif check("operator", ">=")
         @operation = ">="
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       elsif check("operator", ">")
         @operation = ">"
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       elsif check("operator", "==")
         @operation = "=="
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       elsif check("operator", "!=")
         @operation = "!="
+        @generator.op(@operation)
         next!
-        term
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
+      elsif check("operator", "+")
+        @operation = "+"
+        next!
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
+      elsif check("operator", "-")
+        @operation = "-"
+        @generator.op(@operation)
+        next!
+        @generator.load2(@next["lexeme"])
+        @generator.op(@operation)
+        @generator.store(0)
+        type = term
       else
-        term
+        type = term
       end
+      return type
     end
 
 
@@ -866,7 +906,7 @@ class Parser
           next!
           @symbol_table.enter_scope
           @generator.gen(@generator.margin + "label here:")
-          @generator.indent()
+          @generator.indent
           if assignment_statement
             if check("semi_colon", ";")
               next!
@@ -880,7 +920,7 @@ class Parser
                     next!
                     if check("keyword", "for")
                       # jcnd here
-                      @generator.outdent()
+                      @generator.outdent
                       @symbol_table.exit_scope
                       next!
                       return true
