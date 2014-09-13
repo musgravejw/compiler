@@ -10,17 +10,21 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
 
 ```
 | compiler
+
     | src
         | scanner.rb
         | parser.rb
         | semantic.rb
         | code_gen.rb
-        | runtim.rb                     
+        | runtime.rb 
+
     | target
         | generated source files
+
     | tests
         | test programs
 ```
+
 
 
 ##Language
