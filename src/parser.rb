@@ -895,12 +895,14 @@ class Parser
         if check("left_paren", "(")
           next!
           @symbol_table.enter_scope
-          @generator.gen(@generator.margin + "label here:")
+          label = "label_" + @generator.label.to_s
+          @generator.gen("\n" + @generator.margin + label + ":")
           @generator.indent
           if assignment_statement
             if check("semi_colon", ";")
               next!
               if expression
+                @generator.gen(@generator.margin + "if (R[1] != 0) return;")
                 if check("right_paren", ")")                  
                   next!
                   until !program_statement
@@ -909,7 +911,7 @@ class Parser
                   if check("keyword", "end")
                     next!
                     if check("keyword", "for")
-                      # jcnd here
+                      @generator.gen(@generator.margin + "goto " + label + ";\n")
                       @generator.outdent
                       @symbol_table.exit_scope
                       next!

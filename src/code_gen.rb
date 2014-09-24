@@ -14,6 +14,7 @@ class CodeGen
     r = Runtime.new
     @stack = [0]
     @program = r.load_runtime_code_generation
+    @labels = 0
     @margin = ""
   end
 
@@ -57,6 +58,11 @@ class CodeGen
     unless operator.size <= 0
       self.gen(@margin + "R[" + reg.to_s + "] = R[" + reg.to_s + "] #{operator} R[" + (reg + 1).to_s + "];")
     end
+  end
+
+  def label
+    @labels += 1
+    return @labels
   end
 
   def output
