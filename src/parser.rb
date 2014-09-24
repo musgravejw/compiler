@@ -623,71 +623,61 @@ class Parser
       type = ""
       if check("operator", "<")
         @operation = "<"
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", "<=")
         @operation = "<="
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", ">=")
         @operation = ">="
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", ">")
         @operation = ">"
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", "==")
         @operation = "=="
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", "!=")
         @operation = "!="
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", "+")
         @operation = "+"
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       elsif check("operator", "-")
         @operation = "-"
-        @generator.op(@operation)
         next!
-        @generator.load2(@next["lexeme"])
-        @generator.op(@operation)
-        @generator.store(0)
+        sym_op_gen
         type = term
       else
         type = term
       end
       return type
+    end
+
+
+    def sym_op_gen
+      current = @next["lexeme"]
+      unless  @symbol_table.find_symbol(current).nil?
+        address = @symbol_table.find_symbol(current)[:address]
+        value = @symbol_table.find_symbol(current)[:value]
+        @generator.load(address)
+      end
+      @generator.load2(value.nil? ? 0 : value)
+      @generator.op(@operation)
+      @generator.store(address.nil? ? @symbol_table.get_address : address)
     end
 
 
