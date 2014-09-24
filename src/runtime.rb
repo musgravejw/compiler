@@ -29,28 +29,28 @@ class Runtime
 
   def load_runtime_code_generation
     'getBool:
-  scanf("%s", &R[0]);
+  scanf("%s", &R[1]);
 
 getInteger:
-  scanf("%s", &R[0]);
+  scanf("%s", &R[1]);
 
 getFloat:
-  scanf("%s", &R[0]);
+  scanf("%s", &R[1]);
 
 getString:
-  scanf("%s", &R[0]);
+  scanf("%s", &R[1]);
 
 putBool:
-  printf("%s", R[0]);
+  printf("%s", R[1]);
 
 putInteger:
-  printf("%s", R[0]);
+  printf("%s", R[1]);
 
 putFloat:
-  printf("%s", R[0]);
+  printf("%s", R[1]);
 
 putString:
-  printf("%s", R[0]);
+  printf("%s", R[1]);
 '
   end
 end
