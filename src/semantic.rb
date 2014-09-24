@@ -52,4 +52,8 @@ class SymbolTable
     @current_address -= @table[-1].size * 32
   	@table.pop
   end
+
+  def get_address
+    return @current_address
+  end
 end
