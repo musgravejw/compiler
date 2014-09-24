@@ -1,7 +1,7 @@
 task :default => [:test]
 
 task :test do
-  system('clear')
+  puts
   puts "=> Compiling source files ...\n\n"
   ruby "./compiler.rb ./tests/correct/fromJake.src\n\n"
   puts
