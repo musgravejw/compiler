@@ -3,29 +3,35 @@ Compiler ![Build Status](https://travis-ci.org/musgravejw/compiler.svg?branch=ma
 This is a project written in Ruby to demonstrate compiler theory concepts.
 The compiler is a single pass LL(1) recursive descent compiler built from a custom grammar.
 
-##Usage
+## Usage
 `rake` will build everything in the 'tests' dir.
 
 `rake clean` to clear 'target' dir.
 
 ```
-| compiler
+compiler
+    ├── README.md
+    ├── compiler.rb
+    ├── rakefile
+    ├── src
+    │   ├── code_gen.rb
+    │   ├── parser.rb
+    │   ├── runtime.rb
+    │   ├── scanner.rb
+    │   └── semantic.rb
+    └── tests
+        └── correct
+            ├── fromJake.src
+            ├── test_heap.src
+            ├── test_program.src
+            ├── test_program_array.src
+            ├── test_program_minimal.src
+            └── test_program_with_errors.src
 
-    | src
-        | scanner.rb
-        | parser.rb
-        | semantic.rb
-        | code_gen.rb
-        | runtime.rb 
-
-    | target
-        | generated source files
-
-    | tests
-        | test programs
+3 directories, 14 files
 ```
 
-##Language
+## Language
 ```
 <program> ::=
     <program_header> <program_body>
@@ -146,5 +152,5 @@ The compiler is a single pass LL(1) recursive descent compiler built from a cust
     "[a-zA-Z0-9 _,;:.]*"
 ```
 
-##Author
+## Author
 Written by [John Musgrave](http://johnmusgrave.com).
