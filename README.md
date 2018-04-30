@@ -154,3 +154,6 @@ compiler
 
 ## Author
 Written by [John Musgrave](http://johnmusgrave.com).
+
+## License
+Licensed under the [MIT License](https://github.com/musgravejw/compiler/blob/master/LICENSE)
